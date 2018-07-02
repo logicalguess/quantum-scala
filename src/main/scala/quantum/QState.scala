@@ -59,7 +59,7 @@ case class QState[A <: Labeled](state: (A, Complex)*)(implicit ord: Ordering[A] 
     for {
       x <- that
       y <- this
-    } yield Word(x :: ev(y).ls)
+    } yield Word(x :: ev(y).letters)
   }
 
   private def filter(f: A => Boolean): QState[A] = {

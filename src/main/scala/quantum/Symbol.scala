@@ -19,8 +19,8 @@ object Symbol {
   case object Horizontal extends Polarization("H")
   case object Vertical extends Polarization("V")
 
-  case class Word[B <: Symbol](ls: List[B]) extends Labeled {
-    val label = ls.map(_.label).mkString
+  case class Word[B <: Symbol](letters: List[B]) extends Labeled {
+    val label = letters.map(_.label).mkString
   }
 
   def fromInt(i: Int, width: Int): Word[Std] = {
@@ -39,7 +39,7 @@ object Symbol {
         case S1 :: rest => helper(rest, acc * 2 + 1)
       }
     }
-    helper(s.ls, 0)
+    helper(s.letters, 0)
   }
 
 }

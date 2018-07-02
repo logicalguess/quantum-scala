@@ -73,7 +73,7 @@ object Gate {
   // Implementation of f(x) as a quantum gate
   def U(f: Int => Int): Tensor[Word[Std], Word[Std]] => QState[Tensor[Word[Std], Word[Std]]] = (s: Tensor[Word[Std], Word[Std]]) => {
     val Tensor(x, out) = s
-    val fx = Symbol.fromInt(f(Symbol.toInt(x)) ^ Symbol.toInt(out), out.ls.length)
+    val fx = Symbol.fromInt(f(Symbol.toInt(x)) ^ Symbol.toInt(out), out.letters.length)
     pure(x) * pure(fx)
   }
 
