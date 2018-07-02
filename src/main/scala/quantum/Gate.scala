@@ -97,7 +97,7 @@ object Gate {
     pure(s._1) * t2(s._2)
   }
 
-  // List manipulation
+  // Word manipulation
   def liftWord[B1 <: Symbol, B2 <: Symbol](t: B1 => QState[B2])(s: Word[B1]): QState[Word[B2]] = {
     s match {
       case Word(Nil) => pure(Word(Nil))
