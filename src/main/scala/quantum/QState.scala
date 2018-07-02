@@ -54,7 +54,6 @@ case class QState[A <: Labeled](state: (A, Complex)*)(implicit ord: Ordering[A] 
       y <- that
     } yield Tensor(x, y)
   }
-  def ⊗[B <: Labeled](that: QState[B]): QState[Tensor[A, B]] = this * that
 
   def *:[B <: Symbol](that: QState[B])(implicit ev: A =:= Word[B]): QState[Word[B]] = {
     for {
