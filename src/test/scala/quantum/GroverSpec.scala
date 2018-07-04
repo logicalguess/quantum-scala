@@ -1,17 +1,19 @@
 package quantum
 
-import org.specs2.mutable.Specification
+import org.scalacheck.{Arbitrary, Gen}
+import org.scalatest.FlatSpec
+import org.scalatest.prop.GeneratorDrivenPropertyChecks
 
-class GroverSpec extends Specification {
+class GroverSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
 
-  "Grover algorithm" should {
-
-    "find 3" in {
-      Grover.run(3) === 3
-    }
-
-    "find 5" in {
-      Grover.run(5) === 5
-    }
+  implicit val searchValues: Arbitrary[Int] = Arbitrary {
+    for {
+      v <- Gen.choose[Int](0, 99)
+    } yield v
   }
+
+  "Grover algorithm" should "find any value" in forAll  { v: Int =>
+      println("input: " + v)
+      Grover.run(v) === v
+    }
 }

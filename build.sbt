@@ -9,7 +9,8 @@ crossScalaVersions := Seq("2.11.8", "2.12.3")
 
 libraryDependencies ++= Seq(
   "org.apache.commons"        % "commons-math3" % "3.6.1",
-  "org.specs2"               %% "specs2-core"   % "3.8.6"    % "test")
+  "org.scalacheck" %% "scalacheck" % "1.13.4",
+  "org.scalatest" %% "scalatest" % "3.0.1")
 
 scalariformPreferences := scalariformPreferences.value
   .setPreference(DanglingCloseParenthesis, Prevent)
