@@ -24,7 +24,7 @@ class SingleQbitSpec extends FlatSpec with GeneratorDrivenPropertyChecks{
     } yield QState(S0 -> (re0 + im0.i), S1 -> (re1 + im1.i))
   }
 
-  "The probabilities" should "equal the squares of amplitudes' magnitudes" in forAll { s: QState[Std] =>
+  "Probabilities of final states" should "equal the squares of amplitudes' lengths" in forAll { s: QState[Std] =>
     println(s)
     s.hist
   }
