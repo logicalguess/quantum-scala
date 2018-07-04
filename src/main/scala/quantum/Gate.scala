@@ -9,6 +9,8 @@ final class Gate[A, B <: Labeled](val f: A => QState[B]) extends AnyVal {
   def -(g: A => QState[B]): A => QState[B] = (a: A) => f(a) - g(a)
   def *(z: Complex): A => QState[B] = (a: A) => f(a) * z
   def >=>[C <: Labeled](g: B => QState[C]): A => QState[C] = (a: A) => f(a) >>= g
+
+  def apply(s: QState[A with Labeled]) = s.flatMap(f)
 }
 
 object Gate {

@@ -127,6 +127,8 @@ case class QState[A <: Labeled](state: (A, Complex)*)(implicit ord: Ordering[A] 
       }}.mkString(" + ")
     }
   }
+
+  override def equals(obj: scala.Any): Boolean = obj.isInstanceOf[QState[A]] && this.toString.equals(obj.toString)
 }
 
 object QState {

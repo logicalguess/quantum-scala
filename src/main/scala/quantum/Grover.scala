@@ -1,20 +1,11 @@
 package quantum
 
-import quantum.Complex._
 import quantum.QState._
-import quantum.Symbol._
 import quantum.Gate._
 
 import scala.language.reflectiveCalls
 
-object Main {
-
-  def HZH(s: QState[Std]): QState[Std] = s >>= H >>= Z >>= H
-  def runHZHequalsX(s: QState[Std]): (QState[Std], QState[Std]) = (HZH(s), s >>= X)
-
-  // Some convenient states for testing
-  val state1: QState[Std] = QState(S0 -> 0.6, S1 -> 0.8.i)
-  val state2: QState[Std] = QState(S0 -> -0.5, S1 -> r3quarters)
+object Grover {
 
   def iterate[A](n: Int, a: A)(f: A => A): A = {
     if (n <= 0) a
@@ -40,21 +31,13 @@ object Main {
     iterate(r, init)(_ >>= (inv >=> lift1(refl)))
   }
 
-  def runGrover(n: Int) = {
+  def run(n: Int): Int = {
     def f(x: Int) = if (x == n) 1 else 0
     val bits = (math.log(n) / math.log(2)).toInt + 1
     val s = grover(f, bits)
     println("final state: " + s.toString)
     val m = Symbol.toInt(s.measure(_._1).outcome)
     println("measurement: " + m)
-  }
-
-
-
-  def main(args: Array[String]): Unit = {
-    println(runHZHequalsX(state1))
-    println(runHZHequalsX(state2))
-
-    runGrover(3)
+    m
   }
 }
