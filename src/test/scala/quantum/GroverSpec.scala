@@ -12,8 +12,12 @@ class GroverSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
     } yield v
   }
 
+  "Grover algorithm" should "find 5" in  {
+    assert(Grover.run(5) == 5)
+  }
+
   "Grover algorithm" should "find any value" in forAll  { v: Int =>
       println("input: " + v)
-      Grover.run(v) === v
+      assert(Grover.run(v) == v)
     }
 }

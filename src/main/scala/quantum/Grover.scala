@@ -2,14 +2,16 @@ package quantum
 
 import quantum.QState._
 import quantum.Gate._
+import quantum.Symbol.Std
 
 import scala.language.reflectiveCalls
 
 object Grover {
 
-  def iterate[A](n: Int, a: A)(f: A => A): A = {
+  def iterate[A](n: Int, a: A)(f: A => A)(implicit sideEffect: A => Unit): A = {
+    sideEffect(a)
     if (n <= 0) a
-    else iterate(n-1, f(a))(f)
+    else iterate(n-1, f(a))(f)(sideEffect)
   }
 
   /**
@@ -28,7 +30,7 @@ object Grover {
     val r = (math.Pi * math.sqrt(math.pow(2, width)) / 4).toInt
     // zeroes * one >>= lift12(Hn, Hn) >>= repeat(r)(inv >=> lift1(refl))
     val init = zeroes * one >>= lift12(Hn, Hn)
-    iterate(r, init)(_ >>= (inv >=> lift1(refl)))
+    iterate(r, init)(_ >>= (inv >=> lift1(refl)))(s => {println("Iteration state: " + s); s.hist})
   }
 
   def run(n: Int): Int = {
