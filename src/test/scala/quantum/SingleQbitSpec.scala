@@ -17,9 +17,11 @@ class SingleQbitSpec extends FlatSpec with GeneratorDrivenPropertyChecks{
 
   implicit val qbits: Arbitrary[QState[Std]] = Arbitrary {
     for {
-      re <- Gen.choose[Double](-99, 99)
-      im <- Gen.choose[Double](-99, 99)
-    } yield QState(S0 -> re, S1 -> im.i)
+      re0 <- Gen.choose[Double](-99, 99)
+      im0 <- Gen.choose[Double](-99, 99)
+      re1 <- Gen.choose[Double](-99, 99)
+      im1 <- Gen.choose[Double](-99, 99)
+    } yield QState(S0 -> (re0 + im0.i), S1 -> (re1 + im1.i))
   }
 
   "The probabilities" should "equal the squares of amplitudes' magnitudes" in forAll { s: QState[Std] =>
