@@ -1,7 +1,7 @@
 package quantum.domain
 
 import quantum.domain.Labeled.Tensor
-import quantum.domain.Symbol.Word
+import quantum.domain.Symbol._
 
 case class QState[A <: Labeled](state: (A, Complex)*)(implicit ord: Ordering[A] = null) {
   private val rand = new scala.util.Random()
@@ -148,4 +148,14 @@ object QState {
   val r3quarters: Complex = math.sqrt(0.75)
 
   def pure[A <: Labeled](a: A): QState[A] = new QState(a -> Complex.one)
+
+  // Some pure states
+  val s0: QState[Std] = pure(S0)
+  val s1: QState[Std] = pure(S1)
+
+  val plus: QState[Std] = QState(S0 -> rhalf, S1 -> rhalf)
+  val minus: QState[Std] = QState(S0 -> rhalf, S1 -> -rhalf)
+
+  val s_+ = pure(S_+)
+  val s_- = pure(S_-)
 }

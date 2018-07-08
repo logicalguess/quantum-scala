@@ -189,3 +189,83 @@ def *[B <: Labeled](that: QState[B]): QState[Tensor[A, B]] = {
   } yield Tensor(x, y)
 }
 ```
+
+Some important states:
+
+```scala
+val rhalf: Complex = math.sqrt(0.5)
+
+// Some pure states
+val s0: QState[Std] = pure(S0)
+val s1: QState[Std] = pure(S1)
+
+val plus: QState[Std] = QState(S0 -> rhalf, S1 -> rhalf)
+val minus: QState[Std] = QState(S0 -> rhalf, S1 -> -rhalf)
+
+val s_+ = pure(S_+)
+val s_- = pure(S_-)
+```
+
+### Quantum Gates
+
+A quantum gate represents a state transformation. It is enough to define it
+on the current basis.
+
+```scala
+class Gate[A, B <: Labeled](val f: A => QState[B])
+```
+
+A gate can be applied to a state:
+
+```scala
+def apply(s: QState[A with Labeled]) = s.flatMap(f)
+```
+
+Gates can be composed ( >=> )):
+
+```scala
+def >=>[C <: Labeled](g: B => QState[C]): A => QState[C] = (a: A) => f(a) >>= g
+```
+
+A gate is essentially a function:
+
+```scala
+implicit def functionToGate[A, B <: Labeled](f: A => QState[B]): Gate[A, B] = new Gate(f)
+implicit def gateToFunction[A, B <: Labeled](op: Gate[A, B]): A => QState[B] = op.f
+```
+
+Some important gates:
+
+* Pauli X (NOT)
+
+```scala
+// NOT gate
+val X: Gate[Std, Std] = (s0 >< s1) + (s1 >< s0)
+ ```
+ 
+* Hadamard
+
+```scala
+// Hadamard gate
+val H: Gate[Std, Std] = (plus >< s0) + (minus >< s1)
+```
+
+* Pauli Z
+
+```scala
+// Phase flip gate
+val Z: Gate[Std, Std] = (s0 >< s0) + (-s1 >< s1)
+```
+
+An integer function can be represented as a gate:
+
+```scala
+// Implementation of a integer function as a quantum gate
+def U(f: Int => Int): Tensor[Word[Std], Word[Std]] => QState[Tensor[Word[Std], Word[Std]]] = s => {
+  val Tensor(x, out) = s
+  val fx = Symbol.fromInt(f(Symbol.toInt(x)) ^ Symbol.toInt(out), out.letters.length)
+  pure(x) * pure(fx)
+}
+```
+
+Gates can be lifted to tensor products in a natural way.
