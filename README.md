@@ -294,6 +294,9 @@ Grover's algorithm (quantum search)
 
 ![ ](./images/grover_iter.png)
 
+![ ](./images/grover.png)
+
+
 ```scala
   /**
    * Grover's algorithm
