@@ -17,7 +17,7 @@ class GroverSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
 
   implicit val searchValues: Arbitrary[Int] = Arbitrary {
     for {
-      v <- Gen.choose[Int](0, 99)
+      v <- Gen.choose[Int](1, 99)
     } yield v
   }
 

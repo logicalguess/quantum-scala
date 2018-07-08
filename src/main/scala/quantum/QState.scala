@@ -19,8 +19,10 @@ case class QState[A <: Labeled](state: (A, Complex)*)(implicit ord: Ordering[A] 
 
   // Collect like terms and sum their coefficients
   private def collect: QState[A] = {
-    QState(state.groupBy(_._1).toList.map{ case (a, azs) => (a, azs.map(_._2).sum) }: _*)
-  }
+    QState(state.groupBy(_._1).toList.map {
+      case (a, azs) => (a, azs.map(_._2).foldLeft(Complex.zero)(Complex.plus)) }: _*)
+
+}
 
   def flatMap[B <: Labeled](f: A => QState[B]): QState[B] = {
     QState(state.flatMap{ case (a, z) => f(a).mapV(_ * z).state }: _*).collect
@@ -37,7 +39,7 @@ case class QState[A <: Labeled](state: (A, Complex)*)(implicit ord: Ordering[A] 
 
   // Inner product
   def inner(that: QState[A]): Complex = {
-    this.state.map{ case (l, v) => v.conj * that(l) }.sum
+    this.state.map{ case (l, v) => v.conj * that(l) }.foldLeft(Complex.zero)(Complex.plus)
   }
   def <>(that: QState[A]): Complex = this.inner(that)
 

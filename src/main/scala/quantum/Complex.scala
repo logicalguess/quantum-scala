@@ -27,28 +27,11 @@ object Complex {
   implicit def toImaginary(x: Double) = new {
     def i = new Complex(0.0, x)
   }
-  implicit def toImaginary(n: Int) = new {
-    def i = new Complex(0.0, n.toDouble)
-  }
   implicit def toComplex(x: Double) = new Complex(x, 0.0)
 
   val i = new Complex(0.0, 1.0)
   val one = new Complex(1.0, 0.0)
   val zero = new Complex(0.0, 0.0)
-
-  trait ComplexIsNumeric extends Numeric[Complex] {
-    def compare(x: Complex, y: Complex) = ???
-    def fromInt(x: Int) = new Complex(x, 0.0)
-    def plus(x: Complex, y: Complex) = x + y
-    def minus(x: Complex, y: Complex) = x - y
-    def times(x: Complex, y: Complex) = x * y
-    def negate(x: Complex) = x * -1.0
-    def toDouble(x: Complex) = ???
-    def toFloat(x: Complex) = ???
-    def toInt(x: Complex) = ???
-    def toLong(x: Complex) = ???
-  }
-
-  implicit object ComplexIsNumeric extends ComplexIsNumeric
+  def plus(x: Complex, y: Complex) = x + y
 }
 
