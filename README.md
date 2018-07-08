@@ -276,6 +276,26 @@ Grover's algorithm (quantum search)
 
 ![ ](./images/grover_iter.png)
 
+```scala
+  /**
+   * Grover's algorithm
+   */
+  def grover(f: Int => Int, width: Int) = {
+    val Hn = liftWord(H) _
+    val zeroes = pure(Symbol.fromInt(0, width))
+    val one = pure(Symbol.fromInt(1, 1))
+    val inv = U(f)
+    val refl = {
+      val s = zeroes >>= Hn
+      (s >< s) * 2 - I
+    }
+
+    val r = (math.Pi * math.sqrt(math.pow(2, width)) / 4).toInt
+    val init = zeroes * one >>= lift12(Hn, Hn)
+    iterate(r, init)(_ >>= (inv >=> lift1(refl)))
+  }
+```
+
 ## Credits and References
 
 https://github.com/jliszka/quantum-probability-monad
