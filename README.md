@@ -57,10 +57,10 @@ Tensor (similar to Scala's Tuple2):
       
 * polarization
 
-      ```scala  
-      // H-V polarization
-      abstract sealed class Polarization(val label: String) extends Symbol
-      case object Horizontal extends Polarization("H")
-      case object Vertical extends Polarization("V")
-      ```
+```scala  
+// H-V polarization
+abstract sealed class Polarization(val label: String) extends Symbol
+case object Horizontal extends Polarization("H")
+case object Vertical extends Polarization("V")
+```
  
