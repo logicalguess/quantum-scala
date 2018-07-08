@@ -252,7 +252,7 @@ Some important gates:
 
 ```scala
 // NOT gate
-val X: Gate[Std, Std] = (s0 >< s1) + (s1 >< s0)
+val X: Gate[Std, Std] = (s1 >< s0) + (s0 >< s1)
  ```
  
 * Hadamard
@@ -267,8 +267,6 @@ val H: Gate[Std, Std] = (plus >< s0) + (minus >< s1)
 ![ ](./images/hadamard_tests.png)
 
 * Pauli Z
-
-![ ](./images/z.png)
 
 ```scala
 // Phase flip gate

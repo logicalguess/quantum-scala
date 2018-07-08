@@ -30,7 +30,7 @@ object Gate {
   def I[B <: Labeled](b: B): QState[B] = pure(b)
 
   // Not gate
-  val X: Gate[Std, Std] = (s0 >< s1) + (s1 >< s0)
+  val X: Gate[Std, Std] = (s1 >< s0) + (s0 >< s1)
 
   // Phase flip gate
   val Z: Gate[Std, Std] = (s0 >< s0) + (-s1 >< s1)
