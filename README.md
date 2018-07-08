@@ -315,6 +315,10 @@ Grover's algorithm (quantum search)
   }
 ```
 
+![ ](./images/grover1.png)
+
+![ ](./images/grover2.png)
+
 ## Credits and References
 
 https://github.com/jliszka/quantum-probability-monad
