@@ -270,6 +270,12 @@ def U(f: Int => Int): Tensor[Word[Std], Word[Std]] => QState[Tensor[Word[Std], W
 
 Gates can be lifted to tensor products in a natural way.
 
+### Quantum Algorithms
+
+Grover's algorithm (quantum search)
+
+![ ](../images/grover_iter.png)
+
 ## Credits and References
 
 https://github.com/jliszka/quantum-probability-monad
