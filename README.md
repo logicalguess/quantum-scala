@@ -162,7 +162,7 @@ Products of quantum states:
 
 * inner ( <> )
 
-![ ](.images/inner.png)
+![ ](./images/inner.png)
 
 ```scala
 // Inner product
@@ -173,7 +173,7 @@ def inner(that: QState[A]): Complex = {
 
 * outer ( >< )
 
-![ ](.images/outer.png)
+![ ](./images/outer.png)
 
 ```scala
 // Outer product
@@ -184,7 +184,7 @@ def outer[B <: Labeled](that: QState[B]): B => QState[A] = {
 
 * tensor
 
-![ ](.images/tensor.png)
+![ ](./images/tensor.png)
 
 ```scala
 // Tensor product
@@ -198,9 +198,9 @@ def *[B <: Labeled](that: QState[B]): QState[Tensor[A, B]] = {
 
 Some important states:
 
- ![ ](.images/std.png)
+ ![ ](./images/std.png)
  
-![ ](.images/sign.png)
+![ ](./images/sign.png)
  
 ```scala
 val rhalf: Complex = math.sqrt(0.5)
@@ -248,7 +248,7 @@ Some important gates:
 
 * Pauli X (NOT)
 
-![ ](.images/x.png)
+![ ](./images/x.png)
 
 ```scala
 // NOT gate
@@ -257,18 +257,18 @@ val X: Gate[Std, Std] = (s0 >< s1) + (s1 >< s0)
  
 * Hadamard
 
-![ ](.images/hadamard.png)
+![ ](./images/hadamard.png)
 
 ```scala
 // Hadamard gate
 val H: Gate[Std, Std] = (plus >< s0) + (minus >< s1)
 ```
 
-![ ](.images/hadamard_tests.png)
+![ ](./images/hadamard_tests.png)
 
 * Pauli Z
 
-![ ](.images/z.png)
+![ ](./images/z.png)
 
 ```scala
 // Phase flip gate
