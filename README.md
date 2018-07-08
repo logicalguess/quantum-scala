@@ -127,7 +127,7 @@ Quantum state is monadic:
 * map
 
 ```scala
-private def map[B <: Labeled](f: A => B)(implicit ord1: Ordering[B] = null): QState[B] = {
+private def map[B <: Labeled](f: A => B): QState[B] = {
   QState(state.map { case (a, z) => (f(a), z) }: _*).collect
 }
 ```
@@ -148,4 +148,50 @@ private def mapV(f: Complex => Complex): QState[A] = {
 
 ```scala
 def pure[A <: Labeled](a: A): QState[A] = new QState(a -> Complex.one)
+```
+
+Quantum state is collapsed into one of possible outcomes when measured. 
+
+```scala
+case class Measurement[A <: Labeled, B](outcome: B, newState: QState[A])
+```
+
+In the most common case the new state is the pure representation of the outcome.
+
+Products of quantum states:
+
+* inner ( <>)
+
+```scala
+// Inner product
+def inner(that: QState[A]): Complex = {
+  this.state.map { case (l, v) => v.conj * that(l) }.foldLeft(Complex.zero)(Complex.plus)
+}
+```
+
+* outer ( >< )
+
+```scala
+// Outer product
+def outer[B <: Labeled](that: QState[B]): B => QState[A] = {
+  (b: B) => this * that(b).conj
+}
+```
+
+* tensor
+
+```scala
+// Tensor product
+def *[B <: Labeled](that: QState[B]): QState[Tensor[A, B]] = {
+  for {
+    x <- this
+    y <- that
+  } yield Tensor(x, y)
+}
+```
+
+Important state values:
+
+```scala
+val rhalf: Complex = math.sqrt(0.5)
 ```
