@@ -189,9 +189,3 @@ def *[B <: Labeled](that: QState[B]): QState[Tensor[A, B]] = {
   } yield Tensor(x, y)
 }
 ```
-
-Important state values:
-
-```scala
-val rhalf: Complex = math.sqrt(0.5)
-```
