@@ -1,8 +1,8 @@
-package quantum
+package quantum.domain
 
-import quantum.QState._
-import quantum.Labeled._
-import quantum.Symbol._
+import quantum.domain.QState._
+import quantum.domain.Labeled._
+import quantum.domain.Symbol._
 
 final class Gate[A, B <: Labeled](val f: A => QState[B]) extends AnyVal {
   def +(g: A => QState[B]): A => QState[B] = (a: A) => f(a) + g(a)

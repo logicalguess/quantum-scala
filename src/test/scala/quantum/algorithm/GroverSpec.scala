@@ -1,8 +1,9 @@
-package quantum
+package quantum.algorithm
 
 import org.scalacheck.{Arbitrary, Gen}
 import org.scalatest.FlatSpec
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import quantum.domain.{Labeled, QState}
 
 class GroverSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
 

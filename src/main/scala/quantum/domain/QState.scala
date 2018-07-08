@@ -1,7 +1,7 @@
-package quantum
+package quantum.domain
 
-import quantum.Symbol.Word
-import quantum.Labeled.Tensor
+import quantum.domain.Symbol.Word
+import quantum.domain.Labeled.Tensor
 
 case class QState[A <: Labeled](state: (A, Complex)*)(implicit ord: Ordering[A] = null) {
   private val rand = new scala.util.Random()

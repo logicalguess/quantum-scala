@@ -1,20 +1,20 @@
-package quantum
+package quantum.domain
 
 abstract class Symbol extends Labeled
 
 object Symbol {
 
-  // Standard Labeled { |0>, |1> }
+  // Standard { |0>, |1> }
   abstract sealed class Std(val label: String) extends Symbol
   case object S0 extends Std("0")
   case object S1 extends Std("1")
 
-  // Sign Labeled { |+>, |-> }
+  // Sign { |+>, |-> }
   abstract sealed class Sign(val label: String) extends Symbol
   case object S_+ extends Sign("+")
   case object S_- extends Sign("-")
 
-  // H-V polarization Labeled
+  // H-V polarization
   abstract sealed class Polarization(val label: String) extends Symbol
   case object Horizontal extends Polarization("H")
   case object Vertical extends Polarization("V")
@@ -41,7 +41,6 @@ object Symbol {
     }
     helper(s.letters, 0)
   }
-
 }
 
 

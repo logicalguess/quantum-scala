@@ -1,4 +1,4 @@
-package quantum
+package quantum.domain
 
 case class Complex(val re: Double, val im: Double) {
   lazy val conj = Complex(re, -im)

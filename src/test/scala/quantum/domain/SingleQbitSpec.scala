@@ -1,19 +1,20 @@
-package quantum
+package quantum.domain
 
 import org.scalacheck.{Arbitrary, Gen}
 import org.scalatest.FlatSpec
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
-import quantum.Complex._
-import quantum.Gate._
-import quantum.QState._
-import quantum.Symbol._
+import quantum.domain
+import quantum.domain.Complex._
+import quantum.domain.Gate._
+import quantum.domain.QState._
+import quantum.domain.Symbol._
 
 import scala.language.reflectiveCalls
 
 class SingleQbitSpec extends FlatSpec with GeneratorDrivenPropertyChecks{
 
-  val state1: QState[Std] = QState(S0 -> 0.6, S1 -> 0.8.i)
-  val state2: QState[Std] = QState(S0 -> -0.5, S1 -> r3quarters)
+  val state1: QState[Std] = domain.QState(S0 -> 0.6, S1 -> 0.8.i)
+  val state2: QState[Std] = domain.QState(S0 -> -0.5, S1 -> r3quarters)
 
   implicit val qbits: Arbitrary[QState[Std]] = Arbitrary {
     for {
