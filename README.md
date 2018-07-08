@@ -274,7 +274,7 @@ Gates can be lifted to tensor products in a natural way.
 
 Grover's algorithm (quantum search)
 
-![ ](../images/grover_iter.png)
+![ ](./images/grover_iter.png)
 
 ## Credits and References
 
