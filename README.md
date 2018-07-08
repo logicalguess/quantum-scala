@@ -60,7 +60,9 @@ case class Tensor[+L1 <: Labeled, +L2 <: Labeled](_1: L1, _2: L2) extends Labele
       
 ### Symbols and Words
 
-```scala 
+Symbols or letters represent the units of information:
+
+````scala 
 abstract class Symbol extends Labeled
 ```
 
@@ -82,3 +84,19 @@ case object Horizontal extends Polarization("H")
 case object Vertical extends Polarization("V")
 ```
  
+ * binary
+ 
+ ```scala
+// Standard { |0>, |1> }
+abstract sealed class Std(val label: String) extends Symbol
+case object S0 extends Std("0")
+case object S1 extends Std("1")
+ ```
+ 
+Words (symbol strings) represent outcomes or final states:
+
+```scala
+case class Word[B <: Symbol](letters: List[B]) extends Labeled {
+  val label = letters.map(_.label).mkString
+}
+```
