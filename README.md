@@ -4,7 +4,7 @@ Modeling  Quantum Computing concepts (Qbits, quantum state, circuits, gates, mea
 taking advantage of the nice language features. 
 A few simple examples, and Grover's algorithm are included.
 
-## Building Blocks
+## Basic Concepts
 
 ### Complex numbers
 
@@ -99,4 +99,53 @@ Words (symbol strings) represent outcomes or final states:
 case class Word[B <: Symbol](letters: List[B]) extends Labeled {
   val label = letters.map(_.label).mkString
 }
+```
+
+## Quantum Concepts
+
+### Quantum State
+
+A mapping that associates a complex number (amplitude) to each possible outcome:
+
+```scala
+case class QState[A <: Labeled](state: (A, Complex)*)
+```
+
+If outcomes are repeated the amplitudes are combined:
+
+```scala
+// Collect like terms and sum their coefficients
+private def collect: QState[A] = {
+  QState(state.groupBy(_._1).toList.map {
+    case (a, azs) => (a, azs.map(_._2).foldLeft(Complex.zero)(Complex.plus))
+  }: _*)
+}
+```
+
+Quantum state is monadic:
+
+* map
+
+```scala
+private def map[B <: Labeled](f: A => B)(implicit ord1: Ordering[B] = null): QState[B] = {
+  QState(state.map { case (a, z) => (f(a), z) }: _*).collect
+}
+```
+
+* flatMap ( >>= )
+
+```scala
+def flatMap[B <: Labeled](f: A => QState[B]): QState[B] = {
+  QState(state.flatMap { case (a, z) => f(a).mapV(_ * z).state }: _*).collect
+}
+
+private def mapV(f: Complex => Complex): QState[A] = {
+  QState(state.map { case (a, z) => (a, f(z)) }: _*)
+}
+```
+
+* pure (single certain outcome)
+
+```scala
+def pure[A <: Labeled](a: A): QState[A] = new QState(a -> Complex.one)
 ```
