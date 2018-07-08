@@ -60,7 +60,9 @@ case class Tensor[+L1 <: Labeled, +L2 <: Labeled](_1: L1, _2: L2) extends Labele
       
 ### Symbols and Words
 
-    abstract class Symbol extends Labeled
+```scala 
+abstract class Symbol extends Labeled
+```
 
 * spin
 
