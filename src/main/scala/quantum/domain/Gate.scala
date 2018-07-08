@@ -51,7 +51,7 @@ object Gate {
   // Hadamard gate
   val H: U[Std] = (plus >< s0) + (minus >< s1)
 
-  def controlled[B <: Labeled](g: B => QState[B]): Tensor[Std, B] => QState[Tensor[Std, B]] = (s: Tensor[Std, B]) => s match {
+  def controlled[B <: Labeled](g: B => QState[B]): Tensor[Std, B] => QState[Tensor[Std, B]] = s => s match {
     case Tensor(S0, b) => pure(Tensor(S0, b))
     case Tensor(S1, b) => s1 * g(b)
   }

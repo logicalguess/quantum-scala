@@ -2,7 +2,6 @@ package quantum.domain
 
 trait Labeled {
   val label: String
-
   override def toString = label
 }
 

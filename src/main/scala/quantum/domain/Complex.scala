@@ -6,8 +6,8 @@ case class Complex(val re: Double, val im: Double) {
 
   def +(z: Complex) = Complex(re + z.re, im + z.im)
   def -(z: Complex) = Complex(re - z.re, im - z.im)
-  def unary_- = this * -1.0
   def *(x: Double) = Complex(re * x, im * x)
+  def unary_- = this * -1.0
   def *(z: Complex) = Complex(re * z.re - im * z.im, re * z.im + im * z.re)
   def /(x: Double): Complex = Complex(re / x, im / x)
   def /(z: Complex): Complex = (this * z.conj) / (z * z.conj).re
