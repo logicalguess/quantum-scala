@@ -273,5 +273,7 @@ Gates can be lifted to tensor products in a natural way.
 ## Credits and References
 
 https://github.com/jliszka/quantum-probability-monad
+
 https://people.cs.umass.edu/~strubell/doc/quantum_tutorial.pdf
+
 https://quantumexperience.ng.bluemix.net/proxy/tutorial/full-user-guide/004-Quantum_Algorithms/070-Grover's_Algorithm.html
