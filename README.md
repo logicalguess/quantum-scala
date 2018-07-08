@@ -50,10 +50,12 @@ Tensor (similar to Scala's Tuple2):
 
 * spin
 
+```scala  
       // Sign { |+>, |-> }
       abstract sealed class Sign(val label: String) extends Symbol
       case object S_+ extends Sign("+")
       case object S_- extends Sign("-")
+```
       
 * polarization
 
