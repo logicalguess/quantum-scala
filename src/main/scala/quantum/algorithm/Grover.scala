@@ -2,7 +2,7 @@ package quantum.algorithm
 
 import quantum.domain.Gate._
 import quantum.domain.QState._
-import quantum.domain.{Labeled, QState}
+import quantum.domain.Labeled
 import quantum.domain.{QState, Symbol}
 
 import scala.language.reflectiveCalls
