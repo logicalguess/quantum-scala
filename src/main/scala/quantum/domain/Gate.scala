@@ -62,7 +62,7 @@ object Gate {
   // Implementation of f as a quantum gate
   def U(f: Int => Int): Tensor[Word[Std], Word[Std]] => QState[Tensor[Word[Std], Word[Std]]] = s => {
     val Tensor(x, out) = s
-    val fx = Symbol.fromInt(f(Symbol.toInt(x)) ^ Symbol.toInt(out), out.letters.length)
+    val fx = Word.fromInt(f(Word.toInt(x)) ^ Word.toInt(out), out.letters.length)
     pure(x) * pure(fx)
   }
 
@@ -92,5 +92,32 @@ object Gate {
       case Word(Nil) => pure(Word(Nil))
       case Word(h :: rest) => t(h) *: liftWord(t)(Word(rest))
     }
+  }
+
+  def cons[B <: Symbol](s: Tensor[B, Word[B]]): QState[Word[B]] = s match {
+    case Tensor(h, Word(t)) => pure(Word(h :: t))
+  }
+
+  def decons[B <: Symbol](s: Word[B]): QState[Tensor[B, Word[B]]] = s match {
+    case Word(h :: t) => pure(Tensor(h, Word(t)))
+  }
+
+  // Re-associate a nested tensor product
+  def assoc1[B1 <: Labeled, B2 <: Labeled, B3 <: Labeled](b: Tensor[B1, Tensor[B2, B3]]): QState[Tensor[Tensor[B1, B2], B3]] = {
+    b match { case Tensor(b1, Tensor(b2, b3)) => pure(Tensor(Tensor(b1, b2), b3)) }
+  }
+
+  // Re-associate a nested tensor product the other way
+  def assoc2[B1 <: Labeled, B2 <: Labeled, B3 <: Labeled](b: Tensor[Tensor[B1, B2], B3]): QState[Tensor[B1, Tensor[B2, B3]]] = {
+    b match { case Tensor(Tensor(b1, b2), b3) => pure(Tensor(b1, Tensor(b2, b3))) }
+  }
+
+  // Swap the two sides of tensor product
+  def swap[B1 <: Symbol, B2 <: Symbol](b: Tensor[B1, B2]): QState[Tensor[B2, B1]] = {
+    b match { case Tensor(b1, b2) => pure(Tensor(b2, b1)) }
+  }
+
+  def reverse[B <: Symbol](s: Word[B]): QState[Word[B]] = {
+    pure(Word(s.letters.reverse))
   }
 }
