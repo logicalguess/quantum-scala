@@ -27,10 +27,14 @@ object Gate {
   }
 
   // Identity gate
-  def I[B <: Labeled](b: B): QState[B] = pure(b)
+  //def I[B <: Labeled](b: B): QState[B] = pure(b)
+  def I[B <: Labeled]: Gate[B, B] = {s:B => pure(s)}
+
 
   // Not gate
   val X: Gate[Std, Std] = (s1 >< s0) + (s0 >< s1)
+
+  val Y: Gate[Std, Std] = (s1 * Complex.i >< s0) + (-s0 * Complex.i >< s1)
 
   // Phase flip gate
   val Z: Gate[Std, Std] = (s0 >< s0) + (-s1 >< s1)

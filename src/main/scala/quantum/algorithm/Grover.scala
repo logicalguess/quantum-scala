@@ -3,8 +3,8 @@ package quantum.algorithm
 import quantum.domain.Gate._
 import quantum.domain.QState._
 import quantum.domain.Labeled
-import quantum.domain.Symbol.Word
-import quantum.domain.{QState, Symbol}
+import quantum.domain.Symbol.{Std, Word}
+import quantum.domain.QState
 
 import scala.language.reflectiveCalls
 
@@ -28,7 +28,7 @@ object Grover {
     val inv = U(f)
     val refl = {
       val s = zeroes >>= Hn
-      (s >< s) * 2 - I
+      (s >< s) * 2 - I[Word[Std]]
     }
 
     val r = (math.Pi * math.sqrt(math.pow(2, width)) / 4).toInt
