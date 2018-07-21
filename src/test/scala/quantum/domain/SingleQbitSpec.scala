@@ -135,6 +135,19 @@ class SingleQbitSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
     assert(HZH(s) == X(s))
   }
 
+  "Rz(theta)" should "be \"similar\" to R(theta/2)" in forAll { ts: (Double, QState[Std]) =>
+    val theta = ts._1
+    val state = ts._2
+
+    val y: QState[Std] = Rz(theta)(state)
+    val r: QState[Std] = R(theta/2)(state)
+
+    // amplitudes of |0> have same norm
+    assert(math.abs(y(S0).norm2 - r(S0).norm2) < 0.00000000001)
+    // amplitudes of |1> are equal
+    assert(y(S1) == r(S1))
+  }
+
   "Ry(theta)" should "equal rot(theta/2)" in forAll { ts: (Double, QState[Std]) =>
     val theta = ts._1
     val state = ts._2
