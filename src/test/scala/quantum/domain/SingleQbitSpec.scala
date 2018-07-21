@@ -147,7 +147,7 @@ class SingleQbitSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
     assert((z(S0) - r(S0) * Complex.one.rot(-theta/2)).norm2 < 0.00000000001)
     assert(math.abs(z(S0).norm2 - r(S0).norm2) < 0.00000000001)
 
-    // amplitudes of |1> are equal (phase shift by theta)
+    // amplitudes of |1> are equal (phase shift by theta/2)
     assert(z(S1) == r(S1))
 
   }
