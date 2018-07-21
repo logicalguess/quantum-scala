@@ -63,6 +63,12 @@ object Gate {
   // Square root of NOT gate
   val sqrtNot: Gate[Std, Std] = rot(tau/8)
 
+  def Rx(theta: Double): Gate[Std, Std] = I[Std] * math.cos(theta / 2) - X * Complex.i * math.sin(theta / 2)
+
+  def Ry(theta: Double): Gate[Std, Std] = I[Std] * math.cos(theta / 2) - Y * Complex.i * math.sin(theta / 2)
+
+  def Rz(theta: Double): Gate[Std, Std] = I[Std] * math.cos(theta / 2) - Z * Complex.i * math.sin(theta / 2)
+
   // Implementation of f as a quantum gate
   def U(f: Int => Int): Tensor[Word[Std], Word[Std]] => QState[Tensor[Word[Std], Word[Std]]] = s => {
     val Tensor(x, out) = s
