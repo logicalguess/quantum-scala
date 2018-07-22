@@ -218,7 +218,7 @@ class SingleQbitSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
     assert(t(S1).toString == r(S1).toString)
   }
 
-  "Rz(theta)" should "is a weighted average of I and Rz(pi)" in forAll { ts: (Double, QState[Std]) =>
+  "Rz(theta)" should "be a weighted average of I and Rz(pi)" in forAll { ts: (Double, QState[Std]) =>
     val theta = ts._1
     val state = ts._2
 
@@ -263,7 +263,7 @@ class SingleQbitSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
     // i*z = -b + ai
   }
 
-  "Ry(theta)" should "is a weighted average of I and Ry(pi)" in forAll { ts: (Double, QState[Std]) =>
+  "Ry(theta)" should "be a weighted average of I and Ry(pi)" in forAll { ts: (Double, QState[Std]) =>
     val theta = ts._1
     val state = ts._2
 
@@ -293,7 +293,7 @@ class SingleQbitSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
     assert(r(S1).toString == (s(S0) * Complex.one.rot(-math.Pi/2)).toString)
   }
 
-  "Rx(theta)" should "is a weighted average of I and Rx(pi)" in forAll { ts: (Double, QState[Std]) =>
+  "Rx(theta)" should "be a weighted average of I and Rx(pi)" in forAll { ts: (Double, QState[Std]) =>
     val theta = ts._1
     val state = ts._2
 
