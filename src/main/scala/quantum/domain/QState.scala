@@ -83,6 +83,13 @@ case class QState[A <: Labeled](state: (A, Complex)*)(implicit ord: Ordering[A] 
     this.state.toList.map { case (a, z) => a -> z.norm2 }
   }
 
+  def probs = {
+    val probs = for  {
+      x <- this.state.sortBy(_._1)
+    } yield "|" + x._1 + ">  " + x._2.norm2
+    probs.foreach(println)
+  }
+
   def hist(implicit ord: Ordering[A]) {
     plotHist(this.toDist)
   }
