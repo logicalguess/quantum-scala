@@ -48,7 +48,9 @@ class TwoQbitSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
     val p = 0.3
     val theta = math.asin(math.sqrt(p))
 
-    val s: QState[Tensor[Std, Std]] = s0*s0 >>= lift2(rot(theta)) >>= lift1(H)
+    //val s: QState[Tensor[Std, Std]] = s0*s0 >>= lift1(H) >>= lift2(rot(theta))
+    val s: QState[Tensor[Std, Std]] = s0*s0 >>= lift12(H, rot(theta))
+
     val t: QState[Tensor[Std, Std]] = crot(2*theta)(s)
 
     println(t)
