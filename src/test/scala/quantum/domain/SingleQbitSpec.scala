@@ -218,6 +218,19 @@ class SingleQbitSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
     assert(t(S1).toString == r(S1).toString)
   }
 
+  "Rz(theta)" should "is a weighted average of I and Rz(pi)" in forAll { ts: (Double, QState[Std]) =>
+    val theta = ts._1
+    val state = ts._2
+
+    val A: Gate[Std, Std] = I[Std] * math.cos(theta / 2) + Rz(math.Pi) * math.sin(theta / 2)
+
+    val z: QState[Std] = Rz(theta)(state)
+    val a: QState[Std] = A(state)
+
+    assert(z(S0).toString == a(S0).toString)
+    assert(z(S1).toString == a(S1).toString)
+  }
+
   "Rz(pi)" should "rotate the amplitude of |0> by -pi/2 and the amplitude of |1> by pi/2" in forAll { s: QState[Std] =>
 
     val z: QState[Std] = Rz(math.Pi)(s)
@@ -250,6 +263,19 @@ class SingleQbitSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
     // i*z = -b + ai
   }
 
+  "Ry(theta)" should "is a weighted average of I and Ry(pi)" in forAll { ts: (Double, QState[Std]) =>
+    val theta = ts._1
+    val state = ts._2
+
+    val A: Gate[Std, Std] = I[Std] * math.cos(theta / 2) + Ry(math.Pi) * math.sin(theta / 2)
+
+    val z: QState[Std] = Ry(theta)(state)
+    val a: QState[Std] = A(state)
+
+    assert(z(S0).toString == a(S0).toString)
+    assert(z(S1).toString == a(S1).toString)
+  }
+
   "Rx(pi)" should "equal -i*X" in forAll { s: QState[Std] =>
 
     val t: QState[Std] = (X * -Complex.i) (s)
@@ -265,6 +291,19 @@ class SingleQbitSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
 
     assert(r(S0).toString == (s(S1) * Complex.one.rot(-math.Pi/2)).toString)
     assert(r(S1).toString == (s(S0) * Complex.one.rot(-math.Pi/2)).toString)
+  }
+
+  "Rx(theta)" should "is a weighted average of I and Rx(pi)" in forAll { ts: (Double, QState[Std]) =>
+    val theta = ts._1
+    val state = ts._2
+
+    val A: Gate[Std, Std] = I[Std] * math.cos(theta / 2) + Rx(math.Pi) * math.sin(theta / 2)
+
+    val z: QState[Std] = Rx(theta)(state)
+    val a: QState[Std] = A(state)
+
+    assert(z(S0).toString == a(S0).toString)
+    assert(z(S1).toString == a(S1).toString)
   }
 
   "Z" should "equal i*Rz(pi)" in forAll { s: QState[Std] =>
