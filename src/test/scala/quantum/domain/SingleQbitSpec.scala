@@ -98,7 +98,7 @@ class SingleQbitSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
     assert(t(S1) == s(S0))
   }
 
-  "Y" should "swap the amplitudes of |0> abd |1>, multiply each amplitude by i, and negate the amplitude of |1>" in forAll { s: QState[Std] =>
+  "Y" should "swap the amplitudes of |0> and |1>, multiply each amplitude by i, and negate the amplitude of |1>" in forAll { s: QState[Std] =>
     val t: QState[Std] = Y(s)
 
     assert(t(S0) == - s(S1) * Complex.i)
@@ -135,12 +135,44 @@ class SingleQbitSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
     assert(HZH(s) == X(s))
   }
 
+  "Rz(theta)" should "rotate the amplitude of |0> by -theta/2 and the amplitude of |1> by theta/2" in forAll { ts: (Double, QState[Std]) =>
+    val theta = ts._1
+    val state = ts._2
+
+    val z: QState[Std] = Rz(theta)(state)
+
+    // Rz rotates the amplitude of |0> by -theta/2
+    assert(z(S0) == state(S0) * Complex.one.rot(-theta / 2))
+    // Rz rotates the amplitude of |1> by theta/2
+    assert(z(S1) == state(S1) * Complex.one.rot(theta / 2))
+  }
+
+  "R(theta)" should "change the amplitude of |0> and rotate the amplitude of |1> by theta" in forAll { ts: (Double, QState[Std]) =>
+    val theta = ts._1
+    val state = ts._2
+
+    val r: QState[Std] = R(theta)(state)
+
+    // R doesn't change the amplitude of |0>
+    assert(r(S0) == state(S0))
+    // R rotates the amplitude of |1> by theta/
+    assert(r(S1) == state(S1) * Complex.one.rot(theta))
+  }
+
   "Rz(theta)" should "be \"similar\" to R(theta/2)" in forAll { ts: (Double, QState[Std]) =>
     val theta = ts._1
     val state = ts._2
 
     val z: QState[Std] = Rz(theta)(state)
     val r: QState[Std] = R(theta/2)(state)
+
+    // R doesn't change the amplitude of |0>
+    assert(r(S0) == state(S0))
+    // Rz rotates the amplitude of |0> by -theta/2
+    assert(z(S0) == state(S0) * Complex.one.rot(-theta/2))
+    // both Rz and R rotate the amplitude of |1> by theta/2
+    assert(z(S1) == state(S1) * Complex.one.rot(theta/2))
+    assert(r(S1) == state(S1) * Complex.one.rot(theta/2))
 
     // amplitudes of |0> have same norm and differ by a phase of theta/2
     assert((z(S0) * Complex.one.rot(theta/2) - r(S0) ).norm2 < 0.00000000001)
@@ -163,7 +195,21 @@ class SingleQbitSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
     assert(y(S1) == r(S1))
   }
 
-  "Rz(pi)" should "should equal -i*Z" in forAll { s: QState[Std] =>
+  "Ry(theta)" should "mix the amplitudes of |0> and |1> (like vector rotation)" in forAll { ts: (Double, QState[Std]) =>
+    val theta = ts._1
+    val state = ts._2
+
+    val y: QState[Std] = Ry(theta)(state)
+
+    // same formula as 2-dimensional vector rotation (but with half angle)
+    val t0 = state(S0) * math.cos(theta/2) - state(S1) * math.sin(theta/2)
+    val t1 = state(S0) * math.sin(theta/2) + state(S1) * math.cos(theta/2)
+
+    assert(y(S0) == t0)
+    assert(y(S1) == t1)
+  }
+
+  "Rz(pi)" should "equal -i*Z" in forAll { s: QState[Std] =>
 
     val t: QState[Std] = (Z * -Complex.i) (s)
     val r: QState[Std] = Rz(math.Pi)(s)
@@ -172,7 +218,7 @@ class SingleQbitSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
     assert(t(S1).toString == r(S1).toString)
   }
 
-  "Z" should "should equal i*Rz(pi)" in forAll { s: QState[Std] =>
+  "Z" should "equal i*Rz(pi)" in forAll { s: QState[Std] =>
 
     val t: QState[Std] = Z(s)
     val r: QState[Std] = (Rz(math.Pi) * Complex.i)(s)
