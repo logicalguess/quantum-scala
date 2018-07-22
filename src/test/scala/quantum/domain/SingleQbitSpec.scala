@@ -147,7 +147,7 @@ class SingleQbitSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
     assert(z(S1) == state(S1) * Complex.one.rot(theta / 2))
   }
 
-  "R(theta)" should "change the amplitude of |0> and rotate the amplitude of |1> by theta" in forAll { ts: (Double, QState[Std]) =>
+  "R(theta)" should "not change the amplitude of |0> and rotate the amplitude of |1> by theta" in forAll { ts: (Double, QState[Std]) =>
     val theta = ts._1
     val state = ts._2
 
