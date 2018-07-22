@@ -306,6 +306,41 @@ class SingleQbitSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
     assert(z(S1).toString == a(S1).toString)
   }
 
+  "Rx(pi)Rx(pi)" should "equal -I (quaternion basis)" in forAll { s: QState[Std] =>
+
+    val t: QState[Std] = Rx(math.Pi)(Rx(math.Pi)(s))
+
+    assert(t(S0).toString == (-s(S0)).toString)
+    assert(t(S1).toString == (-s(S1)).toString)
+  }
+
+  "Ry(pi)Ry(pi)" should "equal -I (quaternion basis)" in forAll { s: QState[Std] =>
+
+    val t: QState[Std] = Ry(math.Pi)(Ry(math.Pi)(s))
+
+    assert(t(S0).toString == (-s(S0)).toString)
+    assert(t(S1).toString == (-s(S1)).toString)
+  }
+
+  "Rz(pi)Rz(pi)" should "equal -I (quaternion basis)" in forAll { s: QState[Std] =>
+
+    val t: QState[Std] = Rz(math.Pi)(Rz(math.Pi)(s))
+
+    assert(t(S0).toString == (-s(S0)).toString)
+    assert(t(S1).toString == (-s(S1)).toString)
+  }
+
+  "Rx(pi)Ry(pi)Rz(pi)" should "equal -I (quaternion basis)" in forAll { s: QState[Std] =>
+
+    val z: QState[Std] = Rz(math.Pi)(s)
+    val y: QState[Std] = Ry(math.Pi)(z)
+    val x: QState[Std] = Rx(math.Pi)(y)
+
+
+    assert(x(S0).toString == (-s(S0)).toString)
+    assert(x(S1).toString == (-s(S1)).toString)
+  }
+
   "Z" should "equal i*Rz(pi)" in forAll { s: QState[Std] =>
 
     val t: QState[Std] = Z(s)
