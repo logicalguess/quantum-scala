@@ -218,6 +218,16 @@ class SingleQbitSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
     assert(t(S1).toString == r(S1).toString)
   }
 
+  "Rz(pi)" should "rotate the amplitude of |0> by -pi/2 and the amplitude of |1> by pi/2" in forAll { s: QState[Std] =>
+
+    val z: QState[Std] = Rz(math.Pi)(s)
+
+    // Rz rotates the amplitude of |0> by -theta/2
+    assert(z(S0) == s(S0) * Complex.one.rot(-math.Pi / 2))
+    // Rz rotates the amplitude of |1> by theta/2
+    assert(z(S1) == s(S1) * Complex.one.rot(math.Pi / 2))
+  }
+
   "Ry(pi)" should "equal -i*Y" in forAll { s: QState[Std] =>
 
     val t: QState[Std] = (Y * -Complex.i) (s)
@@ -227,6 +237,19 @@ class SingleQbitSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
     assert(t(S1).toString == r(S1).toString)
   }
 
+  "Ry(pi)" should "swap the amplitudes of |0> and |1> and flip the sign of |1> (rotate by pi)" in forAll { s: QState[Std] =>
+
+    val t: QState[Std] = Ry(math.Pi) (s)
+
+    assert(t(S0).toString == (-s(S1)).toString)
+    assert(t(S1).toString == s(S0).toString)
+
+    // rotation by pi in a 4-dimensional space (2 complex numbers as components)
+    // similar to a rotation by pi/2 in the 2-dimensional case, same as multiplying a complex number by i
+    // z = a + bi
+    // i*z = -b + ai
+  }
+
   "Rx(pi)" should "equal -i*X" in forAll { s: QState[Std] =>
 
     val t: QState[Std] = (X * -Complex.i) (s)
@@ -234,6 +257,14 @@ class SingleQbitSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
 
     assert(t(S0).toString == r(S0).toString)
     assert(t(S1).toString == r(S1).toString)
+  }
+
+  "Rx(pi)" should "swap the amplitudes of |0> and |1> and rotate them by -pi/2" in forAll { s: QState[Std] =>
+
+    val r: QState[Std] = Rx(math.Pi)(s)
+
+    assert(r(S0).toString == (s(S1) * Complex.one.rot(-math.Pi/2)).toString)
+    assert(r(S1).toString == (s(S0) * Complex.one.rot(-math.Pi/2)).toString)
   }
 
   "Z" should "equal i*Rz(pi)" in forAll { s: QState[Std] =>
