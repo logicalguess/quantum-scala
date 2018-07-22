@@ -5,7 +5,7 @@ import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import quantum.domain.Gate._
 import quantum.domain.QState._
 import quantum.domain.Labeled.Tensor
-import quantum.domain.Symbol.{S0, S1, Std}
+import quantum.domain.Symbol.{S0, S1, Std, Word}
 
 class TwoQbitSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
 
@@ -55,7 +55,23 @@ class TwoQbitSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
     t.probs
     t.hist
   }
-  
+
+  "prob" should "2 qbits" in {
+    val p = 0.3
+    val theta = math.asin(math.sqrt(p))
+
+    val Hn = liftWord(H) _
+
+    val ancillas = pure(Word.fromInt(0, 1))
+    val target = pure(Word.fromInt(0, 1))
+
+    val t = ancillas * target >>= lift1(Hn) >>= lift2(liftWord(rot(theta)))
+
+    println(t)
+    t.probs
+    t.hist
+  }
+
   "crot" should "s0*s0" in {
     for (i <- 0 to 8)
       println(crot(math.Pi * i/4)(s0*s0))
