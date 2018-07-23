@@ -109,7 +109,7 @@ class TensorSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
       assoc2 >>=
       lift2(crot(4*theta)) >>=
       assoc1
-    
+
     stage2.probs
     stage2.hist
   }

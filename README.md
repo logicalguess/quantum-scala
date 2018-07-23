@@ -286,6 +286,100 @@ def U(f: Int => Int): Tensor[Word[Std], Word[Std]] => QState[Tensor[Word[Std], W
 
 Gates can be lifted to tensor products in a natural way.
 
+### Rotations
+
+![ ](./images/exp.png)
+![ ](./images/rots.png)
+
+The implemementation is straightforward given the foundation built so far.
+```scala
+  def Rx(theta: Double): Gate[Std, Std] = I[Std] * math.cos(theta / 2) - X * Complex.i * math.sin(theta / 2)
+
+  def Ry(theta: Double): Gate[Std, Std] = I[Std] * math.cos(theta / 2) - Y * Complex.i * math.sin(theta / 2)
+
+  def Rz(theta: Double): Gate[Std, Std] = I[Std] * math.cos(theta / 2) - Z * Complex.i * math.sin(theta / 2)
+```
+
+Notice that Rx(pi) = -i*X, Ry(pi) = -i*Y, and Rz(pi) = -i*Z have nice interpretations.
+
+```scala
+  "Rx(pi)" should "swap the amplitudes of |0> and |1> and rotate them by -pi/2" in forAll { s: QState[Std] =>
+
+    val r: QState[Std] = Rx(math.Pi)(s)
+
+    assert(r(S0).toString == (s(S1) * Complex.one.rot(-math.Pi/2)).toString)
+    assert(r(S1).toString == (s(S0) * Complex.one.rot(-math.Pi/2)).toString)
+  }
+```
+
+```scala
+  "Ry(pi)" should "swap the amplitudes of |0> and |1> and flip the sign of |1> (rotate by pi)" in forAll { 
+    s: QState[Std] =>
+
+    val t: QState[Std] = Ry(math.Pi) (s)
+
+    assert(t(S0).toString == (-s(S1)).toString)
+    assert(t(S1).toString == s(S0).toString)
+
+    // rotation by pi in a 4-dimensional space (2 complex numbers as components)
+    // similar to a rotation by pi/2 in the 2-dimensional case, same as multiplying a complex number by i
+    // z = a + bi
+    // i*z = -b + ai
+  }
+```
+
+```scala
+  "Rz(pi)" should "rotate the amplitude of |0> by -pi/2 and the amplitude of |1> by pi/2" in forAll { s: QState[Std] =>
+
+    val z: QState[Std] = Rz(math.Pi)(s)
+
+    // Rz rotates the amplitude of |0> by -theta/2
+    assert(z(S0) == s(S0) * Complex.one.rot(-math.Pi / 2))
+    // Rz rotates the amplitude of |1> by theta/2
+    assert(z(S1) == s(S1) * Complex.one.rot(math.Pi / 2))
+  }
+```
+In general one can think of Rx, Ry and Rz as weighted averages between
+the identity gate I and Rx(pi), Ry(pi) and Rz(pi), respectively. 
+These four gates also form a quaternion basis.
+
+```scala
+  "Rx(pi)Rx(pi)" should "equal -I (quaternion basis)" in forAll { s: QState[Std] =>
+
+    val t: QState[Std] = Rx(math.Pi)(Rx(math.Pi)(s))
+
+    assert(t(S0).toString == (-s(S0)).toString)
+    assert(t(S1).toString == (-s(S1)).toString)
+  }
+
+  "Ry(pi)Ry(pi)" should "equal -I (quaternion basis)" in forAll { s: QState[Std] =>
+
+    val t: QState[Std] = Ry(math.Pi)(Ry(math.Pi)(s))
+
+    assert(t(S0).toString == (-s(S0)).toString)
+    assert(t(S1).toString == (-s(S1)).toString)
+  }
+
+  "Rz(pi)Rz(pi)" should "equal -I (quaternion basis)" in forAll { s: QState[Std] =>
+
+    val t: QState[Std] = Rz(math.Pi)(Rz(math.Pi)(s))
+
+    assert(t(S0).toString == (-s(S0)).toString)
+    assert(t(S1).toString == (-s(S1)).toString)
+  }
+
+  "Rx(pi)Ry(pi)Rz(pi)" should "equal -I (quaternion basis)" in forAll { s: QState[Std] =>
+
+    val z: QState[Std] = Rz(math.Pi)(s)
+    val y: QState[Std] = Ry(math.Pi)(z)
+    val x: QState[Std] = Rx(math.Pi)(y)
+
+
+    assert(x(S0).toString == (-s(S0)).toString)
+    assert(x(S1).toString == (-s(S1)).toString)
+  }
+```
+
 ### Quantum Algorithms
 
 Grover's algorithm (quantum search)
@@ -324,5 +418,7 @@ Grover's algorithm (quantum search)
 https://github.com/jliszka/quantum-probability-monad
 
 https://people.cs.umass.edu/~strubell/doc/quantum_tutorial.pdf
+
+http://www.vcpc.univie.ac.at/~ian/hotlist/qc/talks/bloch-sphere-rotations.pdf
 
 https://quantumexperience.ng.bluemix.net/proxy/tutorial/full-user-guide/004-Quantum_Algorithms/070-Grover's_Algorithm.html
