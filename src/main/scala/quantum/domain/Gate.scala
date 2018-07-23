@@ -47,6 +47,11 @@ object Gate {
     case Tensor(S1, b) => s1 * g(b)
   }
 
+  def controlled1[B <: Labeled](g: B => QState[B]): Tensor[Std, B] => QState[Tensor[Std, B]] = s => s._1 match {
+    case S0 => pure(Tensor(S0, s._2))
+    case S1 => s1 * g(s._2)
+  }
+
   // Controlled not (CNOT) gate
   val cnot: Gate[Tensor[Std, Std], Tensor[Std, Std]] = controlled(X)
 
