@@ -9,8 +9,12 @@ import quantum.domain.Symbol.{S0, S1, Std, Word}
 
 class TensorSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
 
-  def crot(theta: Double)(s: QState[Tensor[Std, Std]]): QState[Tensor[Std, Std]] =
-    s >>= lift2(rot(theta/2)) >>= cnot >>= lift2(rot(-theta/2)) >>= cnot
+  def crot(theta: Double)(s: Tensor[Std, Std]): QState[Tensor[Std, Std]] =
+    pure(s) >>= lift2(rot(theta/2)) >>= cnot >>= lift2(rot(-theta/2)) >>= cnot
+
+  def crot_gate(theta: Double): Gate[Tensor[Std, Std], Tensor[Std, Std]] =
+    (lift2[Std, Std, Std] _)(rot(theta / 2)) >=> cnot >=> (lift2[Std, Std, Std] _)(rot(-theta / 2)) >=> cnot
+
 
   "tensor" should "s0*s0" in {
     val init: QState[Tensor[Std, Std]] = s0 * s0
@@ -42,7 +46,7 @@ class TensorSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
     val init: QState[Tensor[Tensor[Std, Std], Std]] = s1 * s0 * s0
 
     val c1: QState[Tensor[Tensor[Std, Std], Std]] = init >>=
-      lift1(controlled(rot(math.Pi/2)))
+      lift1(crot(math.Pi/2))
 
     c1.probs
 
@@ -67,12 +71,12 @@ class TensorSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
 
     val c2: QState[Tensor[Std, Tensor[Std, Std]]] = init >>=
       assoc2 >>=
-      lift2(controlled(rot(math.Pi/2)))
+      lift2(crot(math.Pi/2))
 
     c2.probs
   }
 
-  "tensor" should "match" in {
+  "tensor" should "words" in {
     val t: QState[Tensor[Tensor[Std, Std], Std]] = s1 * s0 * s0 >>= lift12(lift12(H, H), H)
     println(t)
 
@@ -83,5 +87,30 @@ class TensorSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
 
     val s = one * zeroes >>= lift12(Hn, Hn)
     println(s)
+  }
+
+  "tensor" should "circuit" in {
+    val p = 0.3
+    val theta = math.asin(math.sqrt(p))
+
+    val init: QState[Tensor[Tensor[Std, Std], Std]] = s0 * s0 * s0 >>= lift12(lift12(H, H), rot(theta))
+
+    val stage1 = init >>=
+      lift1(swap) >>=
+      assoc2 >>=
+      lift2(crot(2*theta)) >>=
+      assoc1 >>=
+      lift1(swap)
+
+    stage1.probs
+    stage1.hist
+
+    val stage2 = stage1 >>=
+      assoc2 >>=
+      lift2(crot(4*theta)) >>=
+      assoc1
+    
+    stage2.probs
+    stage2.hist
   }
 }
