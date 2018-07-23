@@ -300,7 +300,7 @@ The implemementation is straightforward given the foundation built so far.
   def Rz(theta: Double): Gate[Std, Std] = I[Std] * math.cos(theta / 2) - Z * Complex.i * math.sin(theta / 2)
 ```
 
-Notice that Rx(pi) = -i*X, Ry(pi) = -i*Y, and Rz(pi) = -i*Z have nice interpretations.
+Notice that Rx(pi) = -iX, Ry(pi) = -iY, and Rz(pi) = -iZ have nice interpretations.
 
 ```scala
   "Rx(pi)" should "swap the amplitudes of |0> and |1> and rotate them by -pi/2" in forAll { s: QState[Std] =>
