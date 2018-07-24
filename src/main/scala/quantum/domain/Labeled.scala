@@ -1,5 +1,7 @@
 package quantum.domain
 
+import quantum.domain.Labeled.Tensor
+
 trait Labeled {
   val label: String
   override def toString = label
@@ -16,6 +18,7 @@ object Labeled {
     */
   case class Tensor[+L1 <: Labeled, +L2 <: Labeled](_1: L1, _2: L2) extends Labeled {
     val label = _1.label + "," + _2.label
+    //override def toString = "[" + _1.toString + "," + _2.toString + "]"
   }
 
   implicit def tensorOrdering[L1 <: Labeled, L2 <: Labeled](implicit ord1: Ordering[L1], ord2: Ordering[L2]): Ordering[Tensor[L1, L2]] = {

@@ -128,7 +128,7 @@ object Gate {
   }
 
   // Swap the two sides of tensor product
-  def swap[B1 <: Symbol, B2 <: Symbol](b: Tensor[B1, B2]): QState[Tensor[B2, B1]] = {
+  def swap[B1 <: Labeled, B2 <: Labeled](b: Tensor[B1, B2]): QState[Tensor[B2, B1]] = {
     b match { case Tensor(b1, b2) => pure(Tensor(b2, b1)) }
   }
 
