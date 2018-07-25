@@ -129,29 +129,23 @@ class WordSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
 
     stage2.probs
     stage2.hist
-
   }
 
   "word" should "circuit2" in {
-
     val p = 0.3
     val theta = math.asin(math.sqrt(p))
 
     def hs(s: Word[Std]): QState[Word[Std]] = {
       var state = pure(s)
-      for (j <- 0 to s.letters.size - 2) {
+      for (j <- 0 to s.letters.size - 2)
         state = state >>= wire(j, H)
-
-      }
       state
     }
 
     def rots(s: Word[Std]): QState[Word[Std]] = {
       var state = pure(s)
-      for (j <- 0 to s.letters.size - 2) {
+      for (j <- 0 to s.letters.size - 2)
         state = state >>= controlledW(j, s.letters.size - 1, rot(math.pow(2, j + 1)*theta))
-
-      }
       state
     }
 
@@ -159,9 +153,8 @@ class WordSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
       var state = pure(s)
       for (j <- (0 to s.letters.size - 2).reverse) {
         state = state >>= wire(j, H)
-        for (k <- (0 to j - 1).reverse) {
+        for (k <- (0 to j - 1).reverse)
           state = state >>= controlledW(j, k, R(-math.Pi/math.pow(2, j - k)))
-        }
       }
       state
     }
