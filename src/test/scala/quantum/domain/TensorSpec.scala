@@ -76,20 +76,13 @@ class TensorSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
     c2.probs
   }
 
-  def applyGate(t: Int, g: Std => QState[Std])(s: Word[Std]): QState[Word[Std]] = {
-    s match {
-      case Word(Nil) => pure(Word(Nil))
-      case Word(h :: rest) if t == 0 => g(h) *: pure(Word(rest))
-      case Word(h :: rest) => pure(h) *: applyGate(t - 1, g)(Word(rest))
-    }
-  }
-
   // assuming t > c
   def cliftWord(c: Int, t: Int, g: Std => QState[Std])(s: Word[Std]): QState[Word[Std]] = {
     s match {
       case Word(Nil) => pure(Word(Nil))
+      case _ if t <= c => throw new Error("control has to be less than target have to be different")
       case Word(S0 :: rest) if c == 0 => pure(Word(S0 :: rest))
-      case Word(S1 :: rest) if c == 0 => s1 *: applyGate(t - 1, g)(Word(rest))
+      case Word(S1 :: rest) if c == 0 => s1 *: wire(t - 1, g)(Word(rest))
       case Word(h :: rest) => pure(h) *: cliftWord(c - 1, t - 1, g)(Word(rest))
     }
   }
@@ -101,16 +94,8 @@ class TensorSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
     cliftWord(size - 1 - c, size - 1 - t, g)(Word(s.letters.reverse)) >>= reverse _
   }
 
-  def controlledW(c: Int, t: Int, g: Std => QState[Std])(s: Word[Std]): QState[Word[Std]] = {
-    t - c match {
-      case diff if diff > 0 => cliftWord(c, t, g)(s)
-      case diff if diff < 0 => cliftWord1(c, t, g)(s)
-      case _ => throw new Error("control and target have to be different")
-    }
-  }
-
   "tensor" should "words" in {
-    println(applyGate(0, H)(Word.fromInt(0, 2)))
+    println(wire(0, H)(Word.fromInt(0, 2)))
 
     println(cliftWord(0, 1, H)(Word(List(S1, S1))))
     println(cliftWord(0, 2, H)(Word(List(S1, S0, S0))))
@@ -119,7 +104,7 @@ class TensorSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
 
   "control" should "reverse" in {
 
-    val state = pure(Word.fromInt(0, 3)) >>= applyGate(0, H) _ >>= applyGate(1, rot(math.Pi/8)) _
+    val state = pure(Word.fromInt(0, 3)) >>= wire(0, H) _ >>= wire(1, rot(math.Pi/8)) _
     println(state)
     println(state  >>= reverse _)
 
@@ -136,7 +121,7 @@ class TensorSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
 
     val s = one * zeroes >>= lift12(Hn, Hn)
     println(s)
-    println(one * zeroes >>= lift1(applyGate(0, H) _) >>= lift2(applyGate(0, H) _) >>= lift2(applyGate(1, H) _))
+    println(one * zeroes >>= lift1(wire(0, H) _) >>= lift2(wire(0, H) _) >>= lift2(wire(1, H) _))
   }
 
   "word" should "circuit" in {
@@ -145,7 +130,7 @@ class TensorSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
     val theta = math.asin(math.sqrt(p))
 
     val start = pure(Word.fromInt(0, 3)) >>=
-      applyGate(0, H) _  >>= applyGate(1, H) _  >>= applyGate(2, rot(theta)) _
+      wire(0, H) _  >>= wire(1, H) _  >>= wire(2, rot(theta)) _
 
     println(start)
 
@@ -232,7 +217,7 @@ class TensorSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
     val theta = math.asin(math.sqrt(p))
 
     val start = pure(Word.fromInt(0, 4)) >>=
-      applyGate(3, rot(theta)) _ >>= applyGate(0, H) _  >>= applyGate(1, H) _  >>= applyGate(2, H) _
+      wire(3, rot(theta)) _ >>= wire(0, H) _  >>= wire(1, H) _  >>= wire(2, H) _
 
     val stage1 = start >>=
       cliftWord(0, 3, rot(2*theta)) >>=
@@ -242,6 +227,17 @@ class TensorSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
     stage1.probs
     stage1.hist
 
+    var stage2 = stage1 >>=
+      wire(2, H) >>=
+      controlledW(2, 1, R(-math.Pi/math.pow(2, 2 - 1))) >>=
+      controlledW(2, 0, R(-math.Pi/math.pow(2, 2 - 0))) >>=
+      wire(1, H)  >>=
+      controlledW(1, 0, R(-math.Pi/math.pow(2, 1 - 0))) >>=
+      wire(0, H)
+
+    stage2.probs
+    stage2.hist
+
   }
 
   "word" should "circuit2" in {
@@ -249,13 +245,27 @@ class TensorSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
     val p = 0.3
     val theta = math.asin(math.sqrt(p))
 
-    val start = pure(Word.fromInt(0, 4)) >>=
-      applyGate(3, rot(theta)) _ >>= applyGate(0, H) _  >>= applyGate(1, H) _  >>= applyGate(2, H) _
+    def hs(s: Word[Std]): QState[Word[Std]] = {
+      var state = pure(s)
+      for (j <- 0 to s.letters.size - 2) {
+        state = state >>= wire(j, H)
 
-    val stage1 = start >>=
-      controlledW(0, 3, rot(2*theta)) >>=
-      controlledW(1, 3, rot(4*theta))>>=
-      controlledW(2, 3, rot(8*theta))
+      }
+      state
+    }
+
+    val start = pure(Word.fromInt(0, 4)) >>= wire(3, rot(theta)) >>= hs
+
+    def rots(s: Word[Std]): QState[Word[Std]] = {
+      var state = pure(s)
+      for (j <- 0 to s.letters.size - 2) {
+        state = state >>= controlledW(j, s.letters.size - 1, rot(math.pow(2, j + 1)*theta))
+
+      }
+      state
+    }
+
+      val stage1 = start >>= rots
 
     //stage1.probs
     //stage1.hist
@@ -263,7 +273,7 @@ class TensorSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
     def iqft(s: Word[Std]): QState[Word[Std]] = {
       var state = pure(s)
       for (j <- (0 to s.letters.size - 2).reverse) {
-        state = state >>= applyGate(j, H)
+        state = state >>= wire(j, H)
         for (k <- (0 to j - 1).reverse) {
           state = state >>= controlledW(j, k, R(-math.Pi/math.pow(2, j - k)))
         }
@@ -275,19 +285,6 @@ class TensorSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
 
     //stage2.probs
     stage2.hist
-    println()
-
-    var st = stage1 >>=
-      applyGate(2, H) >>=
-      controlledW(2, 1, R(-math.Pi/math.pow(2, 2 - 1))) >>=
-      controlledW(2, 0, R(-math.Pi/math.pow(2, 2 - 0))) >>=
-      applyGate(1, H)  >>=
-      controlledW(1, 0, R(-math.Pi/math.pow(2, 1 - 0))) >>=
-      applyGate(0, H)
-
-    //st.probs
-    st.hist
-
   }
 
   "tensor" should "component" in {

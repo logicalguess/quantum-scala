@@ -136,4 +136,33 @@ object Gate {
   def reverse[B <: Symbol](s: Word[B]): QState[Word[B]] = {
     pure(Word(s.letters.reverse))
   }
+
+  def wire(t: Int, g: Std => QState[Std])(s: Word[Std]): QState[Word[Std]] = {
+    s match {
+      case Word(Nil) => pure(Word(Nil))
+      case Word(h :: rest) if t == 0 => g(h) *: pure(Word(rest))
+      case Word(h :: rest) => pure(h) *: wire(t - 1, g)(Word(rest))
+    }
+  }
+
+  def controlledW(c: Int, t: Int, g: Std => QState[Std])(s: Word[Std]): QState[Word[Std]] = {
+    def helper(c: Int, t: Int, g: Std => QState[Std])(s: Word[Std]): QState[Word[Std]] = {
+      s match {
+        case Word(Nil) => pure(Word(Nil))
+        case _ if t <= c => throw new Error("control has to be less than target have to be different")
+        case Word(S0 :: rest) if c == 0 => pure(Word(S0 :: rest))
+        case Word(S1 :: rest) if c == 0 => s1 *: wire(t - 1, g)(Word(rest))
+        case Word(h :: rest) => pure(h) *: helper(c - 1, t - 1, g)(Word(rest))
+      }
+    }
+
+    t - c match {
+      case diff if diff > 0 => helper(c, t, g)(s)
+      case diff if diff < 0 => {
+        val size = s.letters.size
+        helper(size - 1 - c, size - 1 - t, g)(Word(s.letters.reverse)) >>= reverse _
+      }
+      case _ => throw new Error("control and target have to be different")
+    }
+  }
 }
