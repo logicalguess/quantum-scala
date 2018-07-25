@@ -94,6 +94,20 @@ class TensorSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
     }
   }
 
+
+  // t < c
+  def cliftWord1(c: Int, t: Int, g: Std => QState[Std])(s: Word[Std]): QState[Word[Std]] = {
+    cliftWord(t, c, g)(Word(s.letters.reverse)) >>= reverse _
+  }
+
+  def controlledW(c: Int, t: Int, g: Std => QState[Std])(s: Word[Std]): QState[Word[Std]] = {
+    t - c match {
+      case diff if diff > 0 => cliftWord(c, t, g)(s)
+      case diff if diff < 0 => cliftWord1(c, t, g)(s)
+      case _ => throw new Error("control and target have to be different")
+    }
+  }
+
   "tensor" should "words" in {
     println(applyGate(0, H)(Word.fromInt(0, 2)))
 
@@ -102,10 +116,18 @@ class TensorSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
     println(cliftWord(1, 2, H)(Word(List(S0, S1, S0))))
   }
 
-  "tensor" should "words1" in {
-    val t: QState[Tensor[Tensor[Std, Std], Std]] = s1 * s0 * s0 >>= lift12(lift12(H, H), H)
-    //println(t)
+  "control" should "reverse" in {
 
+    val state = pure(Word.fromInt(0, 3)) >>= applyGate(0, H) _ >>= applyGate(1, rot(math.Pi/8)) _
+    println(state)
+    println(state  >>= reverse _)
+
+    println(cliftWord1(2, 0, H)(Word(List(S0, S0, S1))))
+    println(controlledW(2, 0, H)(Word(List(S0, S0, S1))))
+
+  }
+
+  "tensor" should "words1" in {
     val one = pure(Word.fromInt(0, 1))
     val zeroes = pure(Word.fromInt(0, 2))
 
