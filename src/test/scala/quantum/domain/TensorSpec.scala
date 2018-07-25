@@ -130,6 +130,33 @@ class TensorSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
       lift12(lift12(H, H), rot(theta))
 
     println(init)
+
+    val start1 = start >>=
+      cliftWord(0, 2, rot(2*theta))
+
+    start1.probs
+
+    val stage1 = init >>=
+      lift1(swap) >>=
+      assoc2 >>=
+      lift2(crot(2*theta)) >>=
+      assoc1 >>=
+      lift1(swap)
+
+    stage1.probs
+    //stage1.hist
+
+    val start2 = start1 >>=
+      cliftWord(1, 2, rot(4*theta))
+
+    start2.probs
+
+    val stage2 = stage1 >>=
+      assoc2 >>=
+      lift2(crot(4*theta)) >>=
+      assoc1
+
+    stage2.probs
   }
 
   "tensor" should "circuit" in {
@@ -174,6 +201,24 @@ class TensorSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
     val init: QState[Tensor[Tensor[Std, Std], Std]] = s0 * s0 * s0 >>= lift12(lift12(H, H), rot(theta))
 
     c1(init)(crot(2*theta)).probs
+  }
+
+  "word" should "circuit1" in {
+
+    val p = 0.3
+    val theta = math.asin(math.sqrt(p))
+
+    val start = pure(Word.fromInt(0, 4)) >>=
+      applyGate(3, rot(theta)) _ >>= applyGate(0, H) _  >>= applyGate(1, H) _  >>= applyGate(2, H) _
+
+    val stage1 = start >>=
+      cliftWord(0, 3, rot(2*theta)) >>=
+      cliftWord(1, 3, rot(4*theta))>>=
+      cliftWord(2, 3, rot(8*theta))
+
+    stage1.probs
+    stage1.hist
+
   }
 
   "tensor" should "component" in {
