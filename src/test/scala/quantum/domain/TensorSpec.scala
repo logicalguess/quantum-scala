@@ -243,6 +243,49 @@ class TensorSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
 
   }
 
+  "word" should "circuit2" in {
+
+    val p = 0.3
+    val theta = math.asin(math.sqrt(p))
+
+    val start = pure(Word.fromInt(0, 4)) >>=
+      applyGate(3, rot(theta)) _ >>= applyGate(0, H) _  >>= applyGate(1, H) _  >>= applyGate(2, H) _
+
+    val stage1 = start >>=
+      controlledW(0, 3, rot(2*theta)) >>=
+      controlledW(1, 3, rot(4*theta))>>=
+      controlledW(2, 3, rot(8*theta))
+
+    //stage1.probs
+    //stage1.hist
+
+    def iqft(s: Word[Std]): QState[Word[Std]] = {
+      var state = pure(s)
+      for (j <- (0 to s.letters.size - 2).reverse) {
+        state = state >>= applyGate(j, H)
+        for (k <- (0 to j - 1).reverse) {
+          state = state >>= controlledW(j, k, R(-math.Pi/math.pow(2, j - k)))
+        }
+      }
+      state
+    }
+
+    //val stage2 = stage1 >>= iqft
+
+    //stage2.probs
+    //stage2.hist
+
+    var st = stage1 >>= applyGate(2, H) >>=
+      controlledW(2, 1, R(-math.Pi/math.pow(2, 2 - 1))) >>=
+      controlledW(2, 0, R(-math.Pi/math.pow(2, 2 - 0))) //>>=
+      //applyGate(1, H) // >>=
+      //controlledW(2, 1, R(-math.Pi/math.pow(2, 2 - 1)))
+
+    //st.probs
+    st.hist
+
+  }
+
   "tensor" should "component" in {
 
     case class Letter(label: String) extends Symbol
