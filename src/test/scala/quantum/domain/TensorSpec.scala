@@ -76,9 +76,35 @@ class TensorSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
     c2.probs
   }
 
+  def applyGate(t: Int, g: Std => QState[Std])(s: Word[Std]): QState[Word[Std]] = {
+    s match {
+      case Word(Nil) => pure(Word(Nil))
+      case Word(h :: rest) if t == 0 => g(h) *: pure(Word(rest))
+      case Word(h :: rest) => pure(h) *: applyGate(t - 1, g)(Word(rest))
+    }
+  }
+
+  // assuming t > c
+  def cliftWord(c: Int, t: Int, g: Std => QState[Std])(s: Word[Std]): QState[Word[Std]] = {
+    s match {
+      case Word(Nil) => pure(Word(Nil))
+      case Word(S0 :: rest) if c == 0 => pure(Word(S0 :: rest))
+      case Word(S1 :: rest) if c == 0 => s1 *: applyGate(t - 1, g)(Word(rest))
+      case Word(h :: rest) => pure(h) *: cliftWord(c - 1, t - 1, g)(Word(rest))
+    }
+  }
+
   "tensor" should "words" in {
+    println(applyGate(0, H)(Word.fromInt(0, 2)))
+
+    println(cliftWord(0, 1, H)(Word(List(S1, S1))))
+    println(cliftWord(0, 2, H)(Word(List(S1, S0, S0))))
+    println(cliftWord(1, 2, H)(Word(List(S0, S1, S0))))
+  }
+
+  "tensor" should "words1" in {
     val t: QState[Tensor[Tensor[Std, Std], Std]] = s1 * s0 * s0 >>= lift12(lift12(H, H), H)
-    println(t)
+    //println(t)
 
     val one = pure(Word.fromInt(0, 1))
     val zeroes = pure(Word.fromInt(0, 2))
@@ -87,6 +113,23 @@ class TensorSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
 
     val s = one * zeroes >>= lift12(Hn, Hn)
     println(s)
+    println(one * zeroes >>= lift1(applyGate(0, H) _) >>= lift2(applyGate(0, H) _) >>= lift2(applyGate(1, H) _))
+  }
+
+  "word" should "circuit" in {
+
+    val p = 0.3
+    val theta = math.asin(math.sqrt(p))
+
+    val start = pure(Word.fromInt(0, 3)) >>=
+      applyGate(0, H) _  >>= applyGate(1, H) _  >>= applyGate(2, rot(theta)) _
+
+    println(start)
+
+    val init: QState[Tensor[Tensor[Std, Std], Std]] = s0 * s0 * s0 >>=
+      lift12(lift12(H, H), rot(theta))
+
+    println(init)
   }
 
   "tensor" should "circuit" in {
