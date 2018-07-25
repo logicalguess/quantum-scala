@@ -97,7 +97,8 @@ class TensorSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
 
   // t < c
   def cliftWord1(c: Int, t: Int, g: Std => QState[Std])(s: Word[Std]): QState[Word[Std]] = {
-    cliftWord(t, c, g)(Word(s.letters.reverse)) >>= reverse _
+    val size = s.letters.size
+    cliftWord(size - 1 - c, size - 1 - t, g)(Word(s.letters.reverse)) >>= reverse _
   }
 
   def controlledW(c: Int, t: Int, g: Std => QState[Std])(s: Word[Std]): QState[Word[Std]] = {
@@ -270,16 +271,19 @@ class TensorSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
       state
     }
 
-    //val stage2 = stage1 >>= iqft
+    val stage2 = stage1 >>= iqft
 
     //stage2.probs
-    //stage2.hist
+    stage2.hist
+    println()
 
-    var st = stage1 >>= applyGate(2, H) >>=
+    var st = stage1 >>=
+      applyGate(2, H) >>=
       controlledW(2, 1, R(-math.Pi/math.pow(2, 2 - 1))) >>=
-      controlledW(2, 0, R(-math.Pi/math.pow(2, 2 - 0))) //>>=
-      //applyGate(1, H) // >>=
-      //controlledW(2, 1, R(-math.Pi/math.pow(2, 2 - 1)))
+      controlledW(2, 0, R(-math.Pi/math.pow(2, 2 - 0))) >>=
+      applyGate(1, H)  >>=
+      controlledW(1, 0, R(-math.Pi/math.pow(2, 1 - 0))) >>=
+      applyGate(0, H)
 
     //st.probs
     st.hist
