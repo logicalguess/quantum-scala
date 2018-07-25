@@ -2,9 +2,8 @@ package quantum.algorithm
 
 import quantum.domain.Gate._
 import quantum.domain.QState._
-import quantum.domain.Labeled
+import quantum.domain.{Gate, Labeled, QState}
 import quantum.domain.Symbol.{Std, Word}
-import quantum.domain.QState
 
 import scala.language.reflectiveCalls
 
@@ -22,13 +21,13 @@ object Grover {
    * Grover's algorithm
    */
   def grover(f: Int => Int, width: Int)(implicit sideEffect: QState[_ <: Labeled] => Unit = noSideEffect) = {
-    val Hn = liftWord(H) _
+    val Hn: Gate[Word[Std], Word[Std]] = liftWord(H) _
     val zeroes = pure(Word.fromInt(0, width))
     val one = pure(Word.fromInt(1, 1))
     val inv = U(f)
     val refl = {
       val s = zeroes >>= Hn
-      (s >< s) * 2 - I[Word[Std]]
+      (s >< s) * 2.0 - I[Word[Std]]
     }
 
     val r = (math.Pi * math.sqrt(math.pow(2, width)) / 4).toInt

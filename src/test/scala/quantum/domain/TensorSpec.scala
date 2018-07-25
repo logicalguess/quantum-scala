@@ -143,17 +143,19 @@ class TensorSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
     }
 
     def component1(t: Tensor[Labeled, Labeled], i: Int): Labeled = (t._1, i) match {
+      case (l: Letter, _) => l
       case (_, 0) => t._2
       case (u: Tensor[Labeled, Labeled], 1) => u._2
       case (u: Tensor[Labeled, Labeled], _) => component1(u, i - 1)
-      case (l: Letter, _) => l
+      case (_, _) => throw new Error("Illegal arguments")
     }
 
     def component2(t: Tensor[Labeled, Labeled], i: Int): Labeled = (t._2, i) match {
+      case (l: Letter, _) => l
       case (_, 0) => t._1
       case (u: Tensor[Labeled, Labeled], 1) => u._1
       case (u: Tensor[Labeled, Labeled], _) => component2(u, i - 1)
-      case (l: Letter, _) => l
+      case (_, _) => throw new Error("Illegal arguments")
     }
 
     def depth1(t: Tensor[Labeled, Labeled]): Int = {

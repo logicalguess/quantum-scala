@@ -114,6 +114,7 @@ object Gate {
   }
 
   def decons[B <: Symbol](s: Word[B]): QState[Tensor[B, Word[B]]] = s match {
+    case Word(Nil) => QState[Tensor[B, Word[B]]]()
     case Word(h :: t) => pure(Tensor(h, Word(t)))
   }
 
