@@ -7,6 +7,8 @@ import quantum.domain.Labeled.Tensor
 import quantum.domain.QState.{pure, s0, s1}
 import quantum.domain.Symbol.{S0, S1, Std, Word}
 
+import scala.collection.immutable.ListMap
+
 class WordSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
 
 
@@ -145,7 +147,7 @@ class WordSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
     def rots(s: Word[Std]): QState[Word[Std]] = {
       var state = pure(s)
       for (j <- 0 to s.letters.size - 2)
-        state = state >>= controlledW(j, s.letters.size - 1, rot(math.pow(2, j + 1)*theta))
+        state = state >>= controlledW(j, s.letters.size - 1, rot(math.pow(2, j + 1) * theta))
       state
     }
 
@@ -154,7 +156,7 @@ class WordSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
       for (j <- (0 to s.letters.size - 2).reverse) {
         state = state >>= wire(j, H)
         for (k <- (0 to j - 1).reverse)
-          state = state >>= controlledW(j, k, R(-math.Pi/math.pow(2, j - k)))
+          state = state >>= controlledW(j, k, R(-math.Pi / math.pow(2, j - k)))
       }
       state
     }
@@ -165,7 +167,35 @@ class WordSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
 
     //stage1.probs
     //stage1.hist
-    //stage2.probs
+    stage2.probs
     stage2.hist
-  }
+
+    val probs = for {
+      x <- stage2.state.sortBy(_._1)
+    } yield (Word.tailInt(x._1) -> x._2.norm2)
+
+    println(probs)
+    val mapped = probs.groupBy(_._1).mapValues { l => l.foldLeft(0.0) { case (s, (k, v)) => s + v } }
+    println(ListMap(mapped.toSeq.sortBy(_._1):_*))
+
+    def trunc(x: Double, n: Int) = {
+      def p10(n: Int, pow: Long = 10): Long = if (n==0) pow else p10(n-1,pow*10)
+      if (n < 0) {
+        val m = p10(-n).toDouble
+        math.round(x/m) * m
+      }
+      else {
+        val m = p10(n).toDouble
+        math.round(x*m) / m
+      }
+    }
+
+    val sinProbs = for {
+      x <- stage2.state.sortBy(_._1)
+    } yield (trunc(math.pow(math.sin(math.Pi * Word.tailInt(x._1)/8), 2), 3) -> x._2.norm2)
+    println(sinProbs)
+
+    val estimates = sinProbs.groupBy(_._1).mapValues { l => l.foldLeft(0.0) { case (s, (k, v)) => trunc(s + v, 3) } }
+    println(estimates)
+ }
 }

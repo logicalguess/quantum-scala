@@ -50,8 +50,9 @@ object Symbol {
 
       helper(s.letters, 0)
     }
-  }
 
+    def tailInt(s: Word[Std]): Int = toInt(Word(s.letters.tail))
+  }
 }
 
 
