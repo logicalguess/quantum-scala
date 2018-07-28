@@ -12,6 +12,17 @@ import scala.collection.immutable.ListMap
 
 class WordSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
 
+  def trunc(x: Double, n: Int) = {
+    def p10(n: Int, pow: Long = 10): Long = if (n==0) pow else p10(n-1,pow*10)
+    if (n < 0) {
+      val m = p10(-n).toDouble
+      math.round(x/m) * m
+    }
+    else {
+      val m = p10(n).toDouble
+      math.round(x*m) / m
+    }
+  }
 
   // assuming t > c
   def cliftWord(c: Int, t: Int, g: Std => QState[Std])(s: Word[Std]): QState[Word[Std]] = {
@@ -197,18 +208,6 @@ class WordSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
     val mapped = probs.groupBy(_._1).mapValues { l => l.foldLeft(0.0) { case (s, (k, v)) => s + v } }
     println(ListMap(mapped.toSeq.sortBy(_._1):_*))
 
-    def trunc(x: Double, n: Int) = {
-      def p10(n: Int, pow: Long = 10): Long = if (n==0) pow else p10(n-1,pow*10)
-      if (n < 0) {
-        val m = p10(-n).toDouble
-        math.round(x/m) * m
-      }
-      else {
-        val m = p10(n).toDouble
-        math.round(x*m) / m
-      }
-    }
-
     val sinProbs = for {
       x <- stage2.state.sortBy(_._1)
     } yield (trunc(math.pow(math.sin(math.Pi * Word.tailInt(x._1)/8), 2), 3) -> x._2.norm2)
@@ -217,4 +216,43 @@ class WordSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
     val estimates = sinProbs.groupBy(_._1).mapValues { l => l.foldLeft(0.0) { case (s, (k, v)) => trunc(s + v, 3) } }
     println(estimates)
  }
+
+  "poly" should "a*x^2 + b*x + c" in {
+    val a = 1.0
+    val b = 1.0
+    val c = 1.0
+
+    // i = 0, 1, 2 or 3
+    def poly(i: Int): Double = {
+      val circuit = pure(Word.fromInt(2*i, 3)) >>=
+        wire(2, rot(c)) >>=
+        controlledL(Set(0), 2, rot(4*a + 2*b)) >>=
+        controlledL(Set(0, 1), 2, rot(4*a)) >>=
+        controlledL(Set(1), 2, rot(a + b))
+
+      // probability last bit is 1
+      circuit(Word.fromInt(2*i + 1, 3)).norm2
+    }
+
+    for (i <- 0 to 3) {
+      val sinp = math.sin(a * i * i + b * i + c)
+      assert(trunc(poly(i), 9) == trunc(sinp * sinp, 9))
+    }
+
+    // 2 bits for input, 1 ancilla
+    val circuit = pure(Word.fromInt(0, 3)) >>=
+      wire(0, H) >>=
+      wire(1, H) >>=
+      wire(2, rot(c)) >>=
+      controlledL(Set(0), 2, rot(4*a + 2*b)) >>=
+      controlledL(Set(0, 1), 2, rot(4*a)) >>=
+      controlledL(Set(1), 2, rot(a + b))
+
+    for (i <- 0 to 3) {
+      // probability last bit is 1
+      val prob = circuit(Word.fromInt(2*i + 1, 3)).norm2
+      val sinp = math.sin(a * i * i + b * i + c)/2
+      assert(trunc(prob, 9) == trunc(sinp * sinp, 9))
+    }
+  }
 }
