@@ -31,7 +31,7 @@ class WordSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
     cliftWord(size - 1 - c, size - 1 - t, g)(Word(s.letters.reverse)) >>= reverse _
   }
 
-  "tensor" should "words" in {
+  "control" should "words" in {
     println(wire(0, H)(Word.fromInt(0, 2)))
 
     println(cliftWord(0, 1, H)(Word(List(S1, S1))))
@@ -55,7 +55,17 @@ class WordSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
     println(cliftWord1(2, 0, H)(Word(List(S0, S0, S1))))
     println(controlledW1(2, 0, H)(Word(List(S0, S0, S1))))
     println(controlledL(Set(2), 0, H)(Word(List(S0, S0, S1))))
+  }
 
+  "control" should "multi" in {
+
+    println(controlledL(Set(0, 1), 2, H)(Word(List(S0, S1, S0))))
+    println(controlledL(Set(0, 1), 2, H)(Word(List(S1, S0, S0))))
+    println(controlledL(Set(0, 1), 2, H)(Word(List(S1, S1, S0))))
+
+    println(controlledL(Set(0, 2), 1, H)(Word(List(S0, S0, S1))))
+    println(controlledL(Set(0, 2), 1, H)(Word(List(S1, S0, S0))))
+    println(controlledL(Set(0, 2), 1, H)(Word(List(S1, S0, S1))))
   }
 
   "word and tensor" should "words1" in {
