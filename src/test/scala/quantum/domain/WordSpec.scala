@@ -2,7 +2,8 @@ package quantum.domain
 
 import org.scalatest.FlatSpec
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
-import quantum.domain.Gate.{H, R, assoc1, assoc2, cnot, controlledW, lift1, lift12, lift2, liftWord, reverse, rot, swap, wire}
+import quantum.domain.Gate.{H, R, assoc1, assoc2, cnot, controlledW1, lift1, lift12, lift2,
+  liftWord, reverse, rot, swap, wire, controlledW, controlledL}
 import quantum.domain.Labeled.Tensor
 import quantum.domain.QState.{pure, s0, s1}
 import quantum.domain.Symbol.{S0, S1, Std, Word}
@@ -36,6 +37,13 @@ class WordSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
     println(cliftWord(0, 1, H)(Word(List(S1, S1))))
     println(cliftWord(0, 2, H)(Word(List(S1, S0, S0))))
     println(cliftWord(1, 2, H)(Word(List(S0, S1, S0))))
+
+    println(cliftWord(0, 1, H)(Word(List(S1, S1))))
+    println(controlledW1(0, 1, H)(Word(List(S1, S1))))
+    println(controlledL(Set(0), 1, H)(Word(List(S1, S1))))
+
+    println(controlledW1(1, 2, H)(Word(List(S0, S1, S0))))
+    println(controlledL(Set(1), 2, H)(Word(List(S0, S1, S0))))
   }
 
   "control" should "reverse" in {
@@ -45,7 +53,8 @@ class WordSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
     println(state  >>= reverse _)
 
     println(cliftWord1(2, 0, H)(Word(List(S0, S0, S1))))
-    println(controlledW(2, 0, H)(Word(List(S0, S0, S1))))
+    println(controlledW1(2, 0, H)(Word(List(S0, S0, S1))))
+    println(controlledL(Set(2), 0, H)(Word(List(S0, S0, S1))))
 
   }
 
@@ -123,10 +132,10 @@ class WordSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
 
     var stage2 = stage1 >>=
       wire(2, H) >>=
-      controlledW(2, 1, R(-math.Pi/math.pow(2, 2 - 1))) >>=
-      controlledW(2, 0, R(-math.Pi/math.pow(2, 2 - 0))) >>=
+      controlledW1(2, 1, R(-math.Pi/math.pow(2, 2 - 1))) >>=
+      controlledW1(2, 0, R(-math.Pi/math.pow(2, 2 - 0))) >>=
       wire(1, H)  >>=
-      controlledW(1, 0, R(-math.Pi/math.pow(2, 1 - 0))) >>=
+      controlledW1(1, 0, R(-math.Pi/math.pow(2, 1 - 0))) >>=
       wire(0, H)
 
     stage2.probs
@@ -172,7 +181,7 @@ class WordSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
 
     val probs = for {
       x <- stage2.state.sortBy(_._1)
-    } yield (Word.tailInt(x._1) -> x._2.norm2)
+    } yield (Word.tailInt(x._1) -> x._2.norm2) // Word.toInt(x._1) % 8
 
     println(probs)
     val mapped = probs.groupBy(_._1).mapValues { l => l.foldLeft(0.0) { case (s, (k, v)) => s + v } }

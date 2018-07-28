@@ -1,7 +1,7 @@
 package quantum.domain
 
-import quantum.domain.QState._
 import quantum.domain.Labeled._
+import quantum.domain.QState._
 import quantum.domain.Symbol._
 
 final class Gate[A, B <: Labeled](val f: A => QState[B]) {
@@ -145,11 +145,11 @@ object Gate {
     }
   }
 
-  def controlledW(c: Int, t: Int, g: Std => QState[Std])(s: Word[Std]): QState[Word[Std]] = {
+  def controlledW1(c: Int, t: Int, g: Std => QState[Std])(s: Word[Std]): QState[Word[Std]] = {
     def helper(c: Int, t: Int, g: Std => QState[Std])(s: Word[Std]): QState[Word[Std]] = {
       s match {
         case Word(Nil) => pure(Word(Nil))
-        case _ if t <= c => throw new Error("control has to be less than target have to be different")
+        case _ if t <= c => throw new Error("control has to be less than target")
         case Word(S0 :: rest) if c == 0 => pure(Word(S0 :: rest))
         case Word(S1 :: rest) if c == 0 => s1 *: wire(t - 1, g)(Word(rest))
         case Word(h :: rest) => pure(h) *: helper(c - 1, t - 1, g)(Word(rest))
@@ -163,6 +163,25 @@ object Gate {
         helper(size - 1 - c, size - 1 - t, g)(Word(s.letters.reverse)) >>= reverse _
       }
       case _ => throw new Error("control and target have to be different")
+    }
+  }
+
+  def controlledW(c: Int, t: Int, g: Std => QState[Std])(s: Word[Std]): QState[Word[Std]] = {
+    controlledL(Set(c), t, g)(s)
+  }
+
+  def controlledL(c: Set[Int], t: Int, g: Std => QState[Std])(s: Word[Std]): QState[Word[Std]] = {
+    s match {
+      case Word(Nil) => pure(Word(Nil))
+      case w if c.isEmpty => wire(t, g)(w)
+      case _ if c.contains(t) => throw new Error("target cannot be in the control set")
+      case _ if t == 0 => {
+        val size = s.letters.size
+        controlledL(c.map { i => size - 1 - i }, size - 1 - t, g)(Word(s.letters.reverse)) >>= reverse _
+      }
+      case Word(S0 :: rest) if c.contains(0) => pure(Word(S0 :: rest))
+      case Word(S1 :: rest) if c.contains(0) => s1 *: controlledL((c - 0).map { i => i - 1 }, t - 1, g)(Word(rest))
+      case Word(h :: rest) if !c.contains(0) => pure(h) *: controlledL(c.map { i => i - 1 }, t - 1, g)(Word(rest))
     }
   }
 }
