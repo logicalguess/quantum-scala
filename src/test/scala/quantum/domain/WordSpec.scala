@@ -2,10 +2,9 @@ package quantum.domain
 
 import org.scalatest.FlatSpec
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
-import quantum.domain.Gate.{H, R, assoc1, assoc2, cnot, controlledW1, lift1, lift12, lift2,
-  liftWord, reverse, rot, swap, wire, controlledW, controlledL, transform}
+import quantum.domain.Gate._
 import quantum.domain.Labeled.Tensor
-import quantum.domain.QState.{pure, s0, s1}
+import quantum.domain.QState._
 import quantum.domain.Symbol.{S0, S1, Std, Word}
 
 import scala.collection.immutable.ListMap
@@ -13,14 +12,15 @@ import scala.collection.immutable.ListMap
 class WordSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
 
   def trunc(x: Double, n: Int) = {
-    def p10(n: Int, pow: Long = 10): Long = if (n==0) pow else p10(n-1,pow*10)
+    def p10(n: Int, pow: Long = 10): Long = if (n == 0) pow else p10(n - 1, pow * 10)
+
     if (n < 0) {
       val m = p10(-n).toDouble
-      math.round(x/m) * m
+      math.round(x / m) * m
     }
     else {
       val m = p10(n).toDouble
-      math.round(x*m) / m
+      math.round(x * m) / m
     }
   }
 
@@ -59,9 +59,9 @@ class WordSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
 
   "control" should "reverse" in {
 
-    val state = pure(Word.fromInt(0, 3)) >>= wire(0, H) _ >>= wire(1, rot(math.Pi/8)) _
+    val state = pure(Word.fromInt(0, 3)) >>= wire(0, H) _ >>= wire(1, rot(math.Pi / 8)) _
     println(state)
-    println(state  >>= reverse _)
+    println(state >>= reverse _)
 
     println(cliftWord1(2, 0, H)(Word(List(S0, S0, S1))))
     println(controlledW1(2, 0, H)(Word(List(S0, S0, S1))))
@@ -92,13 +92,13 @@ class WordSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
 
   "word and tensor" should "circuit" in {
     def crot(theta: Double)(s: Tensor[Std, Std]): QState[Tensor[Std, Std]] =
-      pure(s) >>= lift2(rot(theta/2)) >>= cnot >>= lift2(rot(-theta/2)) >>= cnot
+      pure(s) >>= lift2(rot(theta / 2)) >>= cnot >>= lift2(rot(-theta / 2)) >>= cnot
 
     val p = 0.3
     val theta = math.asin(math.sqrt(p))
 
     val start = pure(Word.fromInt(0, 3)) >>=
-      wire(0, H) _  >>= wire(1, H) _  >>= wire(2, rot(theta)) _
+      wire(0, H) _ >>= wire(1, H) _ >>= wire(2, rot(theta)) _
 
     println(start)
 
@@ -108,14 +108,14 @@ class WordSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
     println(init)
 
     val start1 = start >>=
-      cliftWord(0, 2, rot(2*theta))
+      cliftWord(0, 2, rot(2 * theta))
 
     start1.probs
 
     val stage1 = init >>=
       lift1(swap) >>=
       assoc2 >>=
-      lift2(crot(2*theta)) >>=
+      lift2(crot(2 * theta)) >>=
       assoc1 >>=
       lift1(swap)
 
@@ -123,13 +123,13 @@ class WordSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
     //stage1.hist
 
     val start2 = start1 >>=
-      cliftWord(1, 2, rot(4*theta))
+      cliftWord(1, 2, rot(4 * theta))
 
     start2.probs
 
     val stage2 = stage1 >>=
       assoc2 >>=
-      lift2(crot(4*theta)) >>=
+      lift2(crot(4 * theta)) >>=
       assoc1
 
     stage2.probs
@@ -141,22 +141,22 @@ class WordSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
     val theta = math.asin(math.sqrt(p))
 
     val start = pure(Word.fromInt(0, 4)) >>=
-      wire(3, rot(theta)) _ >>= wire(0, H) _  >>= wire(1, H) _  >>= wire(2, H) _
+      wire(3, rot(theta)) _ >>= wire(0, H) _ >>= wire(1, H) _ >>= wire(2, H) _
 
     val stage1 = start >>=
-      cliftWord(0, 3, rot(2*theta)) >>=
-      cliftWord(1, 3, rot(4*theta))>>=
-      cliftWord(2, 3, rot(8*theta))
+      cliftWord(0, 3, rot(2 * theta)) >>=
+      cliftWord(1, 3, rot(4 * theta)) >>=
+      cliftWord(2, 3, rot(8 * theta))
 
     stage1.probs
     stage1.hist
 
     var stage2 = stage1 >>=
       wire(2, H) >>=
-      controlledW1(2, 1, R(-math.Pi/math.pow(2, 2 - 1))) >>=
-      controlledW1(2, 0, R(-math.Pi/math.pow(2, 2 - 0))) >>=
-      wire(1, H)  >>=
-      controlledW1(1, 0, R(-math.Pi/math.pow(2, 1 - 0))) >>=
+      controlledW1(2, 1, R(-math.Pi / math.pow(2, 2 - 1))) >>=
+      controlledW1(2, 0, R(-math.Pi / math.pow(2, 2 - 0))) >>=
+      wire(1, H) >>=
+      controlledW1(1, 0, R(-math.Pi / math.pow(2, 1 - 0))) >>=
       wire(0, H)
 
     stage2.probs
@@ -206,16 +206,16 @@ class WordSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
 
     println(probs)
     val mapped = probs.groupBy(_._1).mapValues { l => l.foldLeft(0.0) { case (s, (k, v)) => s + v } }
-    println(ListMap(mapped.toSeq.sortBy(_._1):_*))
+    println(ListMap(mapped.toSeq.sortBy(_._1): _*))
 
     val sinProbs = for {
       x <- stage2.state.sortBy(_._1)
-    } yield (trunc(math.pow(math.sin(math.Pi * Word.toInt(l => l.tail)(x._1)/8), 2), 3) -> x._2.norm2)
+    } yield (trunc(math.pow(math.sin(math.Pi * Word.toInt(l => l.tail)(x._1) / 8), 2), 3) -> x._2.norm2)
     println(sinProbs)
 
     val estimates = sinProbs.groupBy(_._1).mapValues { l => l.foldLeft(0.0) { case (s, (k, v)) => trunc(s + v, 3) } }
     println(estimates)
- }
+  }
 
   "poly" should "a*x^2 + b*x + c" in {
     val a = 1.0
@@ -224,14 +224,14 @@ class WordSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
 
     // i = 0, 1, 2 or 3
     def poly(i: Int): Double = {
-      val circuit = pure(Word.fromInt(2*i, 3)) >>=
+      val circuit = pure(Word.fromInt(2 * i, 3)) >>=
         wire(2, rot(c)) >>=
-        controlledL(Set(0), 2, rot(4*a + 2*b)) >>=
-        controlledL(Set(0, 1), 2, rot(4*a)) >>=
+        controlledL(Set(0), 2, rot(4 * a + 2 * b)) >>=
+        controlledL(Set(0, 1), 2, rot(4 * a)) >>=
         controlledL(Set(1), 2, rot(a + b))
 
       // probability last bit is 1
-      circuit(Word.fromInt(2*i + 1, 3)).norm2
+      circuit(Word.fromInt(2 * i + 1, 3)).norm2
     }
 
     for (i <- 0 to 3) {
@@ -244,15 +244,32 @@ class WordSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
       wire(0, H) >>=
       wire(1, H) >>=
       wire(2, rot(c)) >>=
-      controlledL(Set(0), 2, rot(4*a + 2*b)) >>=
-      controlledL(Set(0, 1), 2, rot(4*a)) >>=
+      controlledL(Set(0), 2, rot(4 * a + 2 * b)) >>=
+      controlledL(Set(0, 1), 2, rot(4 * a)) >>=
       controlledL(Set(1), 2, rot(a + b))
 
     for (i <- 0 to 3) {
       // probability last bit is 1
-      val prob = circuit(Word.fromInt(2*i + 1, 3)).norm2
-      val sinp = math.sin(a * i * i + b * i + c)/2
+      val prob = circuit(Word.fromInt(2 * i + 1, 3)).norm2
+      val sinp = math.sin(a * i * i + b * i + c) / 2
       assert(trunc(prob, 9) == trunc(sinp * sinp, 9))
     }
+  }
+
+  "fib" should "circuit" in {
+
+    val zg: Gate[Std, Std] = (s0 >< s0) + (s0 >< s1)
+
+    def fib(n: Int): QState[Word[Std]] = {
+      var state = pure(Word.fromInt(0, n))
+      for (i <- 0 until n) state = state >>= wire(i, H)
+      for (i <- 0 until n - 1)  state = state >>= controlledL(Set(i), i + 1, zg)
+      state
+    }
+
+    for (n <- 0 to 5) {
+      println(s"F($n) = ${fib(n).state.size} : ${fib(n)}")
+    }
+
   }
 }
