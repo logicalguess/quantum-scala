@@ -3,7 +3,7 @@ package quantum.domain
 import org.scalatest.FlatSpec
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import quantum.domain.Gate.{H, R, assoc1, assoc2, cnot, controlledW1, lift1, lift12, lift2,
-  liftWord, reverse, rot, swap, wire, controlledW, controlledL}
+  liftWord, reverse, rot, swap, wire, controlledW, controlledL, transform}
 import quantum.domain.Labeled.Tensor
 import quantum.domain.QState.{pure, s0, s1}
 import quantum.domain.Symbol.{S0, S1, Std, Word}
@@ -202,7 +202,7 @@ class WordSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
 
     val probs = for {
       x <- stage2.state.sortBy(_._1)
-    } yield (Word.tailInt(x._1) -> x._2.norm2) // Word.toInt(x._1) % 8
+    } yield (Word.toInt(l => l.tail)(x._1) -> x._2.norm2) // Word.toInt(x._1) % 8
 
     println(probs)
     val mapped = probs.groupBy(_._1).mapValues { l => l.foldLeft(0.0) { case (s, (k, v)) => s + v } }
@@ -210,7 +210,7 @@ class WordSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
 
     val sinProbs = for {
       x <- stage2.state.sortBy(_._1)
-    } yield (trunc(math.pow(math.sin(math.Pi * Word.tailInt(x._1)/8), 2), 3) -> x._2.norm2)
+    } yield (trunc(math.pow(math.sin(math.Pi * Word.toInt(l => l.tail)(x._1)/8), 2), 3) -> x._2.norm2)
     println(sinProbs)
 
     val estimates = sinProbs.groupBy(_._1).mapValues { l => l.foldLeft(0.0) { case (s, (k, v)) => trunc(s + v, 3) } }

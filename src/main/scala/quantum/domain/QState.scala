@@ -69,6 +69,13 @@ case class QState[A <: Labeled](state: (A, Complex)*)(implicit ord: Ordering[A] 
     } yield Word(x :: ev(y).letters)
   }
 
+
+  def transform[B <: Symbol](t: List[B] => List[B])(implicit ev: A =:= Word[B]): QState[Word[B]] = {
+    for {
+      x <- this
+    } yield Word(t(ev(x).letters))
+  }
+
   private def filter(f: A => Boolean): QState[A] = {
     QState(state.filter { case (a, z) => f(a) }: _*).normalize
   }

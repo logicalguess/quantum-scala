@@ -184,4 +184,12 @@ object Gate {
       case Word(h :: rest) if !c.contains(0) => pure(h) *: controlledL(c.map { i => i - 1 }, t - 1, g)(Word(rest))
     }
   }
+
+
+  def transform(t: List[Std] => List[Std])(s: Word[Std]): QState[Word[Std]] = {
+//    for {
+//      x <- this
+//    } yield Word(t(s.letters))
+    pure(Word(t(s.letters)))
+  }
 }
