@@ -270,6 +270,28 @@ class WordSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
     for (n <- 0 to 5) {
       println(s"F($n) = ${fib(n).state.size} : ${fib(n)}")
     }
+  }
+
+  "count" should "circuit" in {
+
+    def circuit(bits: Int, k: Int): QState[Word[Std]] = {
+      var state = pure(Word.fromInt(0, bits + 1))
+      for (i <- 0 until bits) state = state >>= wire(i, H)
+      for (i <- 0 until k) state = state >>= wire(bits, rot(1))
+
+      state
+    }
+
+    for (n <- 0 to 5) {
+      val k = n
+      println(s"C($n) = ${circuit(n, k).state.size/2} : ${circuit(n, k)}")
+
+      val sinp = math.sin(k)*math.sin(k)/math.pow(2, k)
+      //prob of last bit being 1
+      val prob = circuit(n, k)(Word.fromInt(2*(n-1) + 1, n + 1)).norm2
+
+      assert(trunc(prob, 9) == trunc(sinp, 9))
+    }
 
   }
 }
