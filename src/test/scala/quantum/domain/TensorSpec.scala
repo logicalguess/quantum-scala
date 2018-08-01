@@ -123,7 +123,7 @@ class TensorSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
 
     case class Letter(label: String) extends Symbol
 
-    def createTensor(n: Int): Labeled= n match {
+    def createTensor(n: Int): Labeled = n match {
       case 0 => Letter("0")
       case _ => Tensor(createTensor(n - 1), Letter("" + n))
     }

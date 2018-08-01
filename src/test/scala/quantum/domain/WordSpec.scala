@@ -275,23 +275,35 @@ class WordSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
   "count" should "circuit" in {
 
     def circuit(bits: Int, k: Int): QState[Word[Std]] = {
+      val angle = 1/math.pow(2, 5/*n*/)
+
       var state = pure(Word.fromInt(0, bits + 1))
       for (i <- 0 until bits) state = state >>= wire(i, H)
-      for (i <- 0 until k) state = state >>= wire(bits, rot(1))
+      for (i <- 0 until k) state = state >>= wire(bits, rot(angle))
 
       state
     }
 
+    def probLastBitOne(state: QState[Word[Std]], width: Int) = state(Word.fromInt(2 * width - 1, width)).norm2
+
+    def probToInt(prob: Double, angle: Double, bits: Int): Int =
+      (math.asin(math.sqrt(prob)*math.pow(2, bits/2.0))/angle).floatValue().intValue()
+
+    def counter(k: Int, angle: Double, bits: Int): Double = math.pow(math.sin(k*angle)/math.pow(2, bits/2.0), 2)
+
     for (n <- 0 to 5) {
-      val k = n
-      println(s"C($n) = ${circuit(n, k).state.size/2} : ${circuit(n, k)}")
+      val angle = 1/math.pow(2, 5/*n*/)
+      val power: Int = math.pow(2, n).toInt
+      for (k <- 0 to power) {
+        println(s"C($n) = ${circuit(n, k).state.size/2} : ${circuit(n, k)}")
 
-      val sinp = math.sin(k)*math.sin(k)/math.pow(2, k)
-      //prob of last bit being 1
-      val prob = circuit(n, k)(Word.fromInt(2*(n-1) + 1, n + 1)).norm2
+        //prob of last bit being 1
+        val prob = probLastBitOne(circuit(n, k), n + 1)
 
-      assert(trunc(prob, 9) == trunc(sinp, 9))
+        assert(trunc(prob, 9) == trunc(counter(k, angle, n), 9))
+        assert(k == probToInt(prob, angle, n))
+      }
     }
-
   }
+
 }
