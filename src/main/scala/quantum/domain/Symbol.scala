@@ -51,7 +51,9 @@ object Symbol {
       helper(s.letters, 0)
     }
 
-    def toInt(t: List[Std] => List[Std])(s: Word[Std]): Int = toInt(Word(t(s.letters)))
+    def transform(t: List[Std] => List[Std])(s: Word[Std]): Word[Std] = Word(t(s.letters))
+
+    def toInt(t: List[Std] => List[Std])(s: Word[Std]): Int = toInt(transform(t)(s))
   }
 }
 

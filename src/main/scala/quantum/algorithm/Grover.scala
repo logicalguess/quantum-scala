@@ -20,7 +20,7 @@ object Grover {
   /**
    * Grover's algorithm
    */
-  def grover(f: Int => Int, width: Int)(implicit sideEffect: QState[_ <: Labeled] => Unit = noSideEffect) = {
+  def grover(f: Int => Int, width: Int, times: Int = 0)(implicit sideEffect: QState[_ <: Labeled] => Unit = noSideEffect) = {
     val Hn: Gate[Word[Std], Word[Std]] = liftWord(H) _
     val zeroes = pure(Word.fromInt(0, width))
     val one = pure(Word.fromInt(1, 1))
@@ -33,7 +33,7 @@ object Grover {
     val r = (math.Pi * math.sqrt(math.pow(2, width)) / 4).toInt
     // zeroes * one >>= lift12(Hn, Hn) >>= repeat(r)(inv >=> lift1(refl))
     val init = zeroes * one >>= lift12(Hn, Hn)
-    iterate(r, init)(_ >>= (inv >=> lift1(refl)))(sideEffect)
+    iterate(math.max(times, r), init)(_ >>= (inv >=> lift1(refl)))(sideEffect)
   }
 
   def run(n: Int)(implicit sideEffect: QState[_ <: Labeled] => Unit = noSideEffect): Int = {

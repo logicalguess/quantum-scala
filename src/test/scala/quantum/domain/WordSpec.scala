@@ -176,8 +176,9 @@ class WordSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
 
     def rots(s: Word[Std]): QState[Word[Std]] = {
       var state = pure(s)
-      for (j <- 0 to s.letters.size - 2)
-        state = state >>= controlledW(j, s.letters.size - 1, rot(math.pow(2, j + 1) * theta))
+      val last = s.letters.size - 1
+      for (j <- 0 to last - 1)
+        state = state >>= controlledW(j, last, rot(math.pow(2, j + 1) * theta))
       state
     }
 
@@ -267,15 +268,26 @@ class WordSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
       state
     }
 
-    for (n <- 0 to 5) {
-      println(s"F($n) = ${fib(n).state.size} : ${fib(n)}")
+    for (n <- 1 to 5) {
+      val q = fib(n)
+      println(s"F($n) = ${q.state.size} : ${q}")
+      q.hist
     }
   }
 
+  def probLastBitOne(state: QState[Word[Std]], width: Int) = state(Word.fromInt(2 * width - 1, width)).norm2
+
+  def probToInt(prob: Double, angle: Double, bits: Int): Int =
+    (math.asin(math.sqrt(prob)*math.pow(2, bits/2.0))/angle).floatValue().intValue()
+
+  def counter(k: Int, angle: Double, bits: Int): Double = math.pow(math.sin(k*angle)/math.pow(2, bits/2.0), 2)
+
   "count" should "circuit" in {
 
+    def anglef(bits: Int) = 1/math.pow(2, 5/*bits*/)
+
     def circuit(bits: Int, k: Int): QState[Word[Std]] = {
-      val angle = 1/math.pow(2, 5/*n*/)
+      val angle = anglef(bits)
 
       var state = pure(Word.fromInt(0, bits + 1))
       for (i <- 0 until bits) state = state >>= wire(i, H)
@@ -284,15 +296,8 @@ class WordSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
       state
     }
 
-    def probLastBitOne(state: QState[Word[Std]], width: Int) = state(Word.fromInt(2 * width - 1, width)).norm2
-
-    def probToInt(prob: Double, angle: Double, bits: Int): Int =
-      (math.asin(math.sqrt(prob)*math.pow(2, bits/2.0))/angle).floatValue().intValue()
-
-    def counter(k: Int, angle: Double, bits: Int): Double = math.pow(math.sin(k*angle)/math.pow(2, bits/2.0), 2)
-
     for (n <- 0 to 5) {
-      val angle = 1/math.pow(2, 5/*n*/)
+      val angle = anglef(n)
       val power: Int = math.pow(2, n).toInt
       for (k <- 0 to power) {
         println(s"C($n) = ${circuit(n, k).state.size/2} : ${circuit(n, k)}")
@@ -306,4 +311,34 @@ class WordSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
     }
   }
 
+
+  "count" should "circuit2" in {
+
+    def anglef(bits: Int) = 0.01
+
+    def circuit(bits: Int): QState[Word[Std]] = {
+      val angle = anglef(bits)
+
+      var state = pure(Word.fromInt(0, bits + 1))
+      for (i <- 0 until bits) state = state >>= wire(i, H)
+      for (i <- 0 until bits) state = state >>= controlledL(Set(i), bits, rot(angle))
+
+      state
+    }
+
+    for (n <- 0 to 5) {
+      val angle = anglef(n)
+      val power: Int = math.pow(2, n).toInt
+      val circ = circuit(n)
+      println(s"C($n) = ${circ.state.size / 2} : ${circ}")
+
+      var probs = for {
+        x <- circ.state.sortBy(_._1)
+      } yield Word.transform(l => l.take(n))(x._1) -> x._2.norm2
+      println(probs)
+
+      val mapped = probs.groupBy(_._1).mapValues { l => l.foldLeft(0.0) { case (s, (k, v)) => s + v } }
+      println(ListMap(mapped.toSeq.sortBy(_._1): _*))
+    }
+  }
 }
