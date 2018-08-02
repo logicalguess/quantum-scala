@@ -1,8 +1,8 @@
 package quantum.algorithm
 
 import quantum.domain.{Gate, QState}
-import quantum.domain.Gate.{H, R, controlledW, rot, wire}
-import quantum.domain.QState.pure
+import quantum.domain.Gate.{H, R, controlledL, controlledW, wire, _}
+import quantum.domain.QState.{pure, s0, s1, _}
 import quantum.domain.Symbol.{Std, Word}
 
 // Brassard
@@ -36,6 +36,9 @@ object Amplitude {
 
   def run(bits: Int, op: Gate[Std, Std], q: Int => Gate[Std, Std]): QState[Word[Std]] =
     pure(Word.fromInt(0, bits)) >>= wire(bits - 1, op) >>= hs >>= lambda(q) >>= iqft
+
+  def run(op: Gate[Std, Std], q: Int => Gate[Std, Std], init: QState[Word[Std]]): QState[Word[Std]] =
+    init >>= wire(init.state.head._1.letters.size - 1, op) >>= lambda(q) >>= iqft
 
   def estimate(circuit: QState[Word[Std]], count: Boolean = false): Map[Double, Double] = {
 

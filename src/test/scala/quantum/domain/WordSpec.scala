@@ -2,7 +2,6 @@ package quantum.domain
 
 import org.scalatest.FlatSpec
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
-import quantum.algorithm.Amplitude
 import quantum.domain.Gate._
 import quantum.domain.Labeled.Tensor
 import quantum.domain.QState._
@@ -258,21 +257,38 @@ class WordSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
     }
   }
 
+  val zg: Gate[Std, Std] = (s0 >< s0) + (s0 >< s1)
+
+  def fib(n: Int): QState[Word[Std]] = {
+    var state = pure(Word.fromInt(0, n))
+    for (i <- 0 until n) state = state >>= wire(i, H)
+    for (i <- 0 until n - 1)  state = state >>= controlledL(Set(i), i + 1, zg)
+    state
+  }
+
   "fib" should "circuit" in {
-
-    val zg: Gate[Std, Std] = (s0 >< s0) + (s0 >< s1)
-
-    def fib(n: Int): QState[Word[Std]] = {
-      var state = pure(Word.fromInt(0, n))
-      for (i <- 0 until n) state = state >>= wire(i, H)
-      for (i <- 0 until n - 1)  state = state >>= controlledL(Set(i), i + 1, zg)
-      state
-    }
 
     for (n <- 1 to 5) {
       val q = fib(n)
       println(s"F($n) = ${q.state.size} : ${q}")
       q.hist
+    }
+  }
+
+  "fib" should "shots" in {
+
+    for (n <- 1 to 7) {
+
+      var results = scala.collection.mutable.Set[String]()
+      val q = fib(n)
+
+      for (shot <- 1 to 2048) {
+        val m = q.measure(w => pure(w)).outcome
+        results += m.toString
+      }
+      println(s"F($n) expected = ${q.state.size} : ${q}")
+      println(s"F($n) measured = ${results.size} : ${results}")
+      assert(results.size == q.state.size)
     }
   }
 
