@@ -2,6 +2,7 @@ package quantum.domain
 
 import org.scalatest.FlatSpec
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import quantum.algorithm.Amplitude
 import quantum.domain.Gate._
 import quantum.domain.Labeled.Tensor
 import quantum.domain.QState._
@@ -340,53 +341,5 @@ class WordSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
       val mapped = probs.groupBy(_._1).mapValues { l => l.foldLeft(0.0) { case (s, (k, v)) => s + v } }
       println(ListMap(mapped.toSeq.sortBy(_._1): _*))
     }
-  }
-
-  "count" should "circuit3" in {
-
-    def hs(s: Word[Std]): QState[Word[Std]] = {
-      var state = pure(s)
-      for (j <- 0 to s.letters.size - 2)
-        state = state >>= wire(j, H)
-      state
-    }
-
-    def lambda(s: Word[Std]): QState[Word[Std]] = {
-      var state = pure(s)
-      val last = s.letters.size - 1
-      for (j <- 0 to last - 1)
-        state = state >>= controlledW(j, last, if (j % 2 == 1) I*(-1.0) else Y*(-Complex.i))
-      state
-    }
-
-    def iqft(s: Word[Std]): QState[Word[Std]] = {
-      var state = pure(s)
-      for (j <- (0 to s.letters.size - 2).reverse) {
-        state = state >>= wire(j, H)
-        for (k <- (0 to j - 1).reverse)
-          state = state >>= controlledW(j, k, R(-math.Pi / math.pow(2, j - k)))
-      }
-      state
-    }
-
-    val n = 5
-    val start = pure(Word.fromInt(0, n)) >>= wire(n - 1, Y*(-Complex.i)) >>= hs
-    val stage1 = start >>= lambda
-    val stage2 = stage1 >>= iqft
-
-    //stage1.probs
-    //stage1.hist
-    stage2.probs
-    stage2.hist
-
-    val N = math.pow(2, n - 1)
-
-    val sinProbs = for {
-      x <- stage2.state.sortBy(_._1)
-    } yield (trunc(N*math.pow(math.sin(math.Pi * Word.toInt(l => l.tail)(x._1) / N), 2), 3) -> x._2.norm2)
-    println(sinProbs)
-
-    val estimates = sinProbs.groupBy(_._1).mapValues { l => l.foldLeft(0.0) { case (s, (k, v)) => trunc(s + v, 3) } }
-    println(estimates)
   }
 }
