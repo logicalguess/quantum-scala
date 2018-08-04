@@ -36,26 +36,56 @@ object Grover {
     iterate(r, init)(_ >>= (inv >=> lift1(refl)))(sideEffect)
   }
 
-  def inv(s: Word[Std]): QState[Word[Std]] = {
-    val size = s.letters.size
-    var state = pure(s)
+  def invL(qs: List[Int])(s: QState[Word[Std]]): QState[Word[Std]] = {
+    val size = qs.size
+    var state = s
     for (j <- (0 to size - 1)) {
-      state = state >>= wire(j, H) >>= wire(j, X)
+      state = state >>= wire(qs(j), H) >>= wire(qs(j), X)
     }
-    state = state >>= controlledL((0 to size - 2).toSet, size - 1, rot(math.Pi))
+    state = state >>= controlledL((0 to size - 2).map(qs).toSet, qs(size - 1), rot(math.Pi))
     for (j <- (0 to size - 1)) {
-      state = state >>= wire(j, X) >>= wire(j, H)
+      state = state >>= wire(qs(j), X) >>= wire(qs(j), H)
     }
     -state
   }
 
-  def oracle(f: Int => Boolean)(s: Word[Std]): QState[Word[Std]] = {
-    val size = s.letters.size
-    val x = Word.toInt(Word(s.letters.take(size - 1)))
-    val a = s.letters.last == S1
+  def inv(s: Word[Std]): QState[Word[Std]] = {
+    invL((0 to s.letters.size - 1).toList)(pure(s))
+
+//    val size = s.letters.size
+//    var state = pure(s)
+//    for (j <- (0 to size - 1)) {
+//      state = state >>= wire(j, H) >>= wire(j, X)
+//    }
+//    state = state >>= controlledL((0 to size - 2).toSet, size - 1, rot(math.Pi))
+//    for (j <- (0 to size - 1)) {
+//      state = state >>= wire(j, X) >>= wire(j, H)
+//    }
+//    -state
+  }
+
+  def oracleL(f: Int => Boolean)(q_in: List[Int], q_out: Int)(s: Word[Std]): QState[Word[Std]] = {
+    val letters = s.letters
+
+    val sub: List[Std] = letters.indices.collect { case i if q_in.contains(i) => letters(i) }.toList
+    val x = Word.toInt(Word(sub))
+
+    val a = letters(q_out) == S1
     val fx = if (a ^ f(x))  S1 else S0
-    val state = pure(Word[Std](s.letters.take(size - 1) ++ List(fx)))
+
+    val state = pure(Word[Std](letters.updated(q_out, fx)))
     state
+  }
+
+  def oracle(f: Int => Boolean)(s: Word[Std]): QState[Word[Std]] = {
+    oracleL(f)((0 to s.letters.size - 2).toList, s.letters.size - 1)(s)
+//
+//    val size = s.letters.size
+//    val x = Word.toInt(Word(s.letters.take(size - 1)))
+//    val a = s.letters.last == S1
+//    val fx = if (a ^ f(x))  S1 else S0
+//    val state = pure(Word[Std](s.letters.take(size - 1) ++ List(fx)))
+//    state
   }
 
   def grover(f: Int => Boolean)(width: Int): QState[Word[Std]] = {
