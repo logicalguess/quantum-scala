@@ -33,7 +33,7 @@ object QFT {
     for (j <- (0 to qs.size - 1)) {
       state = state >>= wire(qs(j), H)
       for (k <- (j + 1 to qs.size - 1))
-        state = state >>= controlledW(k, j, R(math.Pi / math.pow(2, k - j)))
+        state = state >>= controlledW(qs(k), qs(j), R(math.Pi / math.pow(2, k - j)))
     }
     state >>= reverse
   }
