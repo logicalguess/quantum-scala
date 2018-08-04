@@ -3,9 +3,11 @@ package quantum.algorithm
 import org.scalacheck.{Arbitrary, Gen}
 import org.scalatest.FlatSpec
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
-import quantum.algorithm.Grover.grover
-import quantum.domain.Symbol.Word
-import quantum.domain.{Labeled, QState}
+import quantum.algorithm.Grover._
+import quantum.domain.Gate._
+import quantum.domain.QState.pure
+import quantum.domain.Symbol.{S0, S1, Std, Word}
+import quantum.domain.{Gate, Labeled, QState}
 
 class GroverSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
 
@@ -16,6 +18,91 @@ class GroverSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
 
   "Grover algorithm" should "find 5" in {
     assert(Grover.run(5)(report) == 5)
+  }
+
+  "oracle" should "" in {
+    def f(x: Int) = x == 5
+    val in = 5
+
+    println(oracle(f)(Word.fromInt(in, 3)))
+  }
+
+  "inv" should "compare" in {
+
+    for (i <- 1 to 100) {
+      val bits = (math.log(i) / math.log(2)).toInt + 1
+      val w = Word.fromInt(i, bits)
+
+      val Hn: Gate[Word[Std], Word[Std]] = liftWord(H) _
+      val state = pure(w)
+
+      def refl(width: Int) = {
+        val s = pure(Word.fromInt(0, width)) >>= Hn
+        (s >< s) * 2.0 - I[Word[Std]]
+      }
+      assert(inv(w) == (pure(w) >>= refl(bits)))
+    }
+  }
+
+  "oracle" should "compare" in {
+    def f(x: Int) = x == 5
+    def g(x: Int) = if (x == 5) 1 else 0
+
+    for (i <- 1 to 100) {
+      val bits = (math.log(i) / math.log(2)).toInt + 1
+      val w = Word.fromInt(i, bits)
+
+      val state = pure(w)
+      val one = pure(Word.fromInt(1, 1))
+
+      //assert(Amplitude.oracle(f)(Word(w.letters ++ List(S1))) == (pure(w) * one >>= U(g)))
+      println(oracle(f)(Word(w.letters ++ List(S1))))
+      println(pure(w) * one >>= U(g))
+
+      println()
+    }
+
+  }
+
+  "grover" should "find 5" in {
+
+    def f(x: Int) = x == 5
+
+    val s = grover(f)(3)
+    println(s)
+    val m = Word.toInt(s.measure().outcome)
+    println(m/2)
+
+  }
+
+  "grover" should "find 5 compare" in {
+
+    def f(x: Int) = x == 5
+
+    var state = pure(Word[Std](List.fill(3)(S0) ++ List(S1)))
+    state = state >>= wire(0, H) >>= wire(1, H) >>= wire(2, H) >>= wire(3, H)
+    state = state >>= oracle(f) >>= inv
+
+    println(state)
+    state.hist
+
+    def g(x: Int) = if (x == 5) 1 else 0
+    val Hn: Gate[Word[Std], Word[Std]] = liftWord(H) _
+
+    def refl(width: Int) = {
+      val s = pure(Word.fromInt(0, width)) >>= Hn
+      (s >< s) * 2.0 - I[Word[Std]]
+    }
+
+    val w = Word.fromInt(0, 3)
+    val one = pure(Word.fromInt(1, 1))
+
+    var s = pure(w) * one >>= lift12(Hn, Hn)
+    s = s >>= U(g) >>= lift1(refl(3))
+    println(s)
+    s.hist
+
+
   }
 
   implicit val searchValues: Arbitrary[Int] = Arbitrary {

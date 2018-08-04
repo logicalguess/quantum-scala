@@ -3,7 +3,7 @@ package quantum.algorithm
 import quantum.domain.{Gate, QState}
 import quantum.domain.Gate._
 import quantum.domain.QState._
-import quantum.domain.Symbol.{S0, S1, Std, Word}
+import quantum.domain.Symbol.{Std, Word}
 
 // Brassard
 object Amplitude {
@@ -30,44 +30,6 @@ object Amplitude {
       state = state >>= wire(j, H)
       for (k <- (0 to j - 1).reverse)
         state = state >>= controlledW(j, k, R(-math.Pi / math.pow(2, j - k)))
-    }
-    state
-  }
-
-  def inv(s: Word[Std]): QState[Word[Std]] = {
-    val size = s.letters.size
-    var state = pure(s)
-    for (j <- (0 to size - 1)) {
-      state = state >>= wire(j, H) >>= wire(j, X)
-    }
-    state = state >>= controlledL((0 to size - 2).toSet, size - 1, Z)
-    for (j <- (0 to size - 1)) {
-      state = state >>= wire(j, X) >>= wire(j, H)
-    }
-    state
-  }
-
-  def oracle(f: Int => Boolean)(s: Word[Std]): QState[Word[Std]] = {
-    val size = s.letters.size
-    val x = Word.toInt(Word(s.letters.take(size - 1)))
-    val fx = if (f(x))  S1 else S0
-    val state = pure(Word[Std](s.letters.take(size - 1) ++ List(fx)))
-    state
-  }
-
-  def grover(f: Int => Boolean)(width: Int): QState[Word[Std]] = {
-    val r = (math.Pi * math.sqrt(math.pow(2, width)) / 4).toInt
-    var state = pure(Word[Std](List.fill(width)(S0) ++ List(S1)))
-
-    for (j <- (0 until width + 1)) {
-      state = state >>= wire(j, H)
-    }
-    state.hist
-
-    for (i <- 1 to r) {
-      state = state  >>= oracle(f) //>>= inv
-      println("Iteration " + i)
-      state.hist
     }
     state
   }
