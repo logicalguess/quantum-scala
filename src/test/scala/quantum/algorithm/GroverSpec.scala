@@ -186,10 +186,6 @@ class GroverSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
     val n_controls = 1
     val n_targets = 3
 
-    val controls = (0 to n_controls - 1).toList
-    val targets = (n_controls to n_controls + n_targets - 1).toList
-    val ancilla = n_controls + n_targets
-
     val g0 = oracleL(f)(List(0, 1, 2), 3) _ >=> invL(List(0, 1, 2) ++ List(3))
 
     def gf(shift: Int) =
@@ -223,10 +219,6 @@ class GroverSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
 
     val n_controls = 2
     val n_targets = 3
-
-    val controls = (0 to n_controls - 1).toList
-    val targets = (n_controls to n_controls + n_targets - 1).toList
-    val ancilla = n_controls + n_targets
 
     val g0 = oracleL(f)(List(0, 1, 2), 3) _ >=> invL(List(0, 1, 2) ++ List(3))
 

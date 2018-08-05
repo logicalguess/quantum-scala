@@ -27,6 +27,32 @@ class AmplitudeSpec extends FlatSpec {
     println(estimates)
   }
 
+  "bernoulli1" should "circuit" in {
+
+    val p = 0.3
+    val theta = math.asin(math.sqrt(p))
+
+    val op: Gate[Std, Std] = rot(theta)
+
+    def q(j: Int): Gate[Std, Std] = rot(math.pow(2, j + 1) * theta)
+
+    val n_targets = 3
+
+    var state = pure(Word.fromInt(0, n_targets + 1))
+    state = state >>= wire(n_targets, op)
+    for (j <- (0 until n_targets)) {
+      state = state >>= wire(j, H)
+    }
+    state = state >>= Amplitude.lambdaL(List(0, 1, 2), 3)(q) // Amplitude.lambda(q) //
+    state = state >>= QFT.iqftL(List(0, 1, 2)) // Amplitude.iqft //
+
+    state.probs
+    state.hist
+
+    val estimates = Amplitude.estimate(state)
+    println(estimates)
+  }
+
   "count" should "circuit" in {
 
     val op: Gate[Std, Std] = Y * Complex.i // -HZHZ

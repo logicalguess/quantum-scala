@@ -15,7 +15,7 @@ object Amplitude {
     state
   }
 
-  def lambdaL(qc: List[Int], qt: Int)(g: Int => Gate[Std, Std])(s: QState[Word[Std]]): QState[Word[Std]] = {
+  def lambdaS(qc: List[Int], qt: Int)(g: Int => Gate[Std, Std])(s: QState[Word[Std]]): QState[Word[Std]] = {
     var state = s
     for (j <- 0 to qc.size - 1) {
       state = state >>= controlledW(qc(j), qt, g(j))
@@ -23,8 +23,10 @@ object Amplitude {
     state
   }
 
+  def lambdaL(qc: List[Int], qt: Int)(g: Int => Gate[Std, Std])(s: Word[Std]): QState[Word[Std]] = lambdaS(qc, qt)(g)(pure(s))
+
   def lambda(q: Int => Gate[Std, Std])(s: Word[Std]): QState[Word[Std]] = {
-    lambdaL((0 to s.letters.size - 2).toList, s.letters.size - 1)(q)(pure(s))
+    lambdaS((0 to s.letters.size - 2).toList, s.letters.size - 1)(q)(pure(s))
 
 //    var state = pure(s)
 //    val last = s.letters.size - 1

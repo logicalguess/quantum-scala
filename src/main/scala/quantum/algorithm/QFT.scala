@@ -20,17 +20,6 @@ object QFT {
 
   def iqftL(qs: List[Int])(s: Word[Std]): QState[Word[Std]] = iqftS(qs)(pure(s))
 
-
-  def qft1(qs: List[Int])(s: QState[Word[Std]]): QState[Word[Std]] = {
-    var state = s
-    for (j <- (0 to qs.size - 1).reverse) {
-      state = state >>= wire(qs(j), H)
-      for (k <- (0 to j - 1).reverse)
-        state = state >>= controlledW(qs(k), qs(j), R(math.Pi / math.pow(2, j - k)))
-    }
-    state
-  }
-
   def qftS(qs: List[Int])(s: QState[Word[Std]]): QState[Word[Std]] = {
     var state = s
     for (j <- (0 to qs.size - 1)) {
