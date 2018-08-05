@@ -157,11 +157,18 @@ class GroverSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
   "grover indexed" should "work" in {
     def f(x: Int) = x == 5
 
-    var state = pure(Word[Std](List.fill(3)(S0) ++ List(S1)))
+    val n_controls = 0
+    val n_targets = 3
 
-    val g = oracleL(f)(List(0, 1, 2), 3) _  >=> invL(List(0, 1, 2, 3))
+    val controls = (0 to n_controls - 1).toList
+    val targets = (n_controls to n_controls + n_targets - 1).toList
+    val ancilla = n_controls + n_targets
 
-    for (j <- (0 to 3)) {
+    val g = oracleL(f)(targets, ancilla) _ >=> invL(targets ++ List(ancilla))
+
+    var state = pure(Word[Std](List.fill(n_controls + n_targets)(S0) ++ List(S1)))
+
+    for (j <- (0 to n_controls + n_targets)) {
       state = state >>= wire(j, H)
     }
 
@@ -169,8 +176,6 @@ class GroverSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
     state.hist
 
     state = state >>= g
-
-    println(state)
     state.hist
   }
 }
