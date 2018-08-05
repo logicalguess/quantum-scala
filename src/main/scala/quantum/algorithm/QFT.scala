@@ -28,7 +28,7 @@ object QFT {
     state
   }
 
-  def qftL(qs: List[Int])(s: QState[Word[Std]]): QState[Word[Std]] = {
+  def qftS(qs: List[Int])(s: QState[Word[Std]]): QState[Word[Std]] = {
     var state = s
     for (j <- (0 to qs.size - 1)) {
       state = state >>= wire(qs(j), H)
@@ -38,8 +38,10 @@ object QFT {
     state >>= reverse
   }
 
-  def qft(s: Word[Std]): QState[Word[Std]] = {
-    qftL((0 to s.letters.size - 1).toList)(pure(s))
+  def qftL(qs: List[Int])(s: Word[Std]): QState[Word[Std]] = qftS(qs)(pure(s))
+
+    def qft(s: Word[Std]): QState[Word[Std]] = {
+    qftS((0 to s.letters.size - 1).toList)(pure(s))
 //    var state = pure(s)
 //    for (j <- (0 to s.letters.size - 1)) {
 //      state = state >>= wire(j, H)

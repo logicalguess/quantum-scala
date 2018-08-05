@@ -37,7 +37,7 @@ class QFTSpec extends FlatSpec {
     assert((s2 >>= QFT.qft) == (s2 >>= QFT.QFT))
     assert((s2 * rhalf >>= QFT.qft) == (s2 * rhalf >>= QFT.QFT))
 
-    assert((s2 >>= QFT.qft) == (QFT.qftL((0 to s.state.head._1.letters.size - 1).toList)(s2)))
+    assert((s2 >>= QFT.qft) == (QFT.qftS((0 to s.state.head._1.letters.size - 1).toList)(s2)))
   }
 
 }
