@@ -5,7 +5,7 @@ import org.scalatest.FlatSpec
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import quantum.algorithm.Grover._
 import quantum.domain.Gate._
-import quantum.domain.QState.pure
+import quantum.domain.QState._
 import quantum.domain.Symbol.{S0, S1, Std, Word}
 import quantum.domain.{Gate, Labeled, QState}
 
@@ -165,6 +165,56 @@ class GroverSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
     val ancilla = n_controls + n_targets
 
     val g = oracleL(f)(targets, ancilla) _ >=> invL(targets ++ List(ancilla))
+
+    var state = pure(Word[Std](List.fill(n_controls + n_targets)(S0) ++ List(S1)))
+
+    for (j <- (0 to n_controls + n_targets)) {
+      state = state >>= wire(j, H)
+    }
+
+    state = state >>= g
+    state.hist
+
+    state = state >>= g
+    state.hist
+  }
+
+  def controlledA(c: Set[Int], g: Word[Std] => QState[Word[Std]])(s: Word[Std]): QState[Word[Std]] = {
+    println(s)
+    s match {
+      case Word(Nil) => pure(Word(Nil))
+      case w if c.isEmpty => pure(w) >>= g
+      case Word(S0 :: rest) if c.contains(0) => pure(Word(S0 :: rest))
+      case Word(S1 :: rest) if c.contains(0) => s1 *: controlledA((c - 0).map { i => i - 1 }, g)(Word(rest))
+      case Word(h :: rest) if !c.contains(0) => pure(h) *: controlledA(c.map { i => i - 1 }, g)(Word(rest))
+    }
+  }
+
+  def controlledA1(c: Int, g: Word[Std] => QState[Word[Std]])(s: Word[Std]): QState[Word[Std]] = {
+    println(s)
+    s match {
+      case Word(Nil) => pure(Word(Nil))
+      case Word(S0 :: rest) => pure(Word(S0 :: rest))
+      case Word(S1 :: rest) => s1 *: g(Word(rest))
+    }
+  }
+
+  "controls shift" should "work" in {
+    def f(x: Int) = x == 5
+
+    val n_controls = 1
+    val n_targets = 3
+
+    val controls = (0 to n_controls - 1).toList
+    val targets = (n_controls to n_controls + n_targets - 1).toList
+    val ancilla = n_controls + n_targets
+
+    val g0 = oracleL(f)(List(0, 1, 2), 3) _ >=> invL(List(0, 1, 2) ++ List(3))
+
+    def gf(shift: Int) =
+      oracleL(f)(List(0, 1, 2).map { i => i + shift }, 3 + shift) _ >=> invL((List(0, 1, 2) ++ List(3)).map { i => i + shift })
+
+    lazy val g = gf(n_controls)
 
     var state = pure(Word[Std](List.fill(n_controls + n_targets)(S0) ++ List(S1)))
 
