@@ -8,7 +8,7 @@ import quantum.domain.Symbol.{Std, Word}
 
 object QFT {
 
-  def iqft(qs: List[Int])(s: QState[Word[Std]]): QState[Word[Std]] = {
+  def iqftS(qs: List[Int])(s: QState[Word[Std]]): QState[Word[Std]] = {
     var state = s
     for (j <- (0 to qs.size - 1).reverse) {
       state = state >>= wire(qs(j), H)
@@ -17,6 +17,9 @@ object QFT {
     }
     state
   }
+
+  def iqftL(qs: List[Int])(s: Word[Std]): QState[Word[Std]] = iqftS(qs)(pure(s))
+
 
   def qft1(qs: List[Int])(s: QState[Word[Std]]): QState[Word[Std]] = {
     var state = s
@@ -40,7 +43,7 @@ object QFT {
 
   def qftL(qs: List[Int])(s: Word[Std]): QState[Word[Std]] = qftS(qs)(pure(s))
 
-    def qft(s: Word[Std]): QState[Word[Std]] = {
+  def qft(s: Word[Std]): QState[Word[Std]] = {
     qftS((0 to s.letters.size - 1).toList)(pure(s))
 //    var state = pure(s)
 //    for (j <- (0 to s.letters.size - 1)) {
