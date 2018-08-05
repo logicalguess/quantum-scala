@@ -75,7 +75,7 @@ class GroverSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
 
   }
 
-  "grover" should "find 5 compare" in {
+  "grover steps" should "find 5 compare" in {
 
     def f(x: Int) = x == 5
 
@@ -132,7 +132,45 @@ class GroverSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
       println("measurement: " + m + " -> " + Integer.toBinaryString(m))
       results(noConsecutiveOnes(m)) = results(noConsecutiveOnes(m)) + 1
     }
-
     println(results)
+  }
+
+  "groverb" should "no consecutive 1s" in {
+    def noConsecutiveOnes(n: Int): Boolean = (n & (n >>> 1)) == 0
+
+    def f(x: Int) = if (noConsecutiveOnes(x)) 1 else 0
+
+    var results = scala.collection.mutable.Map[Boolean, Int](true -> 0, false -> 0)
+
+    val count = 100
+    for (i <- 1 to count) {
+      val s = grover(noConsecutiveOnes)(4)
+
+      println("final state: " + s.toString)
+      val m = Word.toInt(s.measure().outcome)
+      println("measurement: " + m/2 + " -> " + Integer.toBinaryString(m/2))
+      results(noConsecutiveOnes(m)) = results(noConsecutiveOnes(m)) + 1
+    }
+    println(results)
+  }
+
+  "grover indexed" should "work" in {
+    def f(x: Int) = x == 5
+
+    var state = pure(Word[Std](List.fill(3)(S0) ++ List(S1)))
+
+    val g = oracleL(f)(List(0, 1, 2), 3) _  >=> invL(List(0, 1, 2, 3))
+
+    for (j <- (0 to 3)) {
+      state = state >>= wire(j, H)
+    }
+
+    state = state >>= g
+    state.hist
+
+    state = state >>= g
+
+    println(state)
+    state.hist
   }
 }

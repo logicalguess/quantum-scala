@@ -36,7 +36,7 @@ object Grover {
     iterate(r, init)(_ >>= (inv >=> lift1(refl)))(sideEffect)
   }
 
-  def invL(qs: List[Int])(s: QState[Word[Std]]): QState[Word[Std]] = {
+  def invW(qs: List[Int])(s: QState[Word[Std]]): QState[Word[Std]] = {
     val size = qs.size
     var state = s
     for (j <- (0 to size - 1)) {
@@ -49,8 +49,10 @@ object Grover {
     -state
   }
 
+  def invL(qs: List[Int])(s: Word[Std]): QState[Word[Std]] = invW(qs)(pure(s))
+
   def inv(s: Word[Std]): QState[Word[Std]] = {
-    invL((0 to s.letters.size - 1).toList)(pure(s))
+    invL((0 to s.letters.size - 1).toList)(s)
 
 //    val size = s.letters.size
 //    var state = pure(s)
@@ -98,12 +100,12 @@ object Grover {
     for (j <- (0 to width)) {
       state = state >>= wire(j, H)
     }
-    state.hist
+    //state.hist
 
     for (i <- 1 to r) {
       state = state  >>= oracle(f) >>= inv
-      println("Iteration " + i)
-      state.hist
+      //println("Iteration " + i)
+      //state.hist
     }
     state
   }
