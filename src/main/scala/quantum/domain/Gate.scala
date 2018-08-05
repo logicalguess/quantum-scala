@@ -185,6 +185,13 @@ object Gate {
     }
   }
 
+  def controlledI(c: Int, g: Word[Std] => QState[Word[Std]])(s: Word[Std]): QState[Word[Std]] = {
+    s match {
+      case Word(Nil) => pure(Word(Nil))
+      case Word(letters) if letters(c) == S0 => pure(s)
+      case Word(letters) if letters(c) == S1 => g(s)
+    }
+  }
 
   def transform(t: List[Std] => List[Std])(s: Word[Std]): QState[Word[Std]] = {
 //    for {

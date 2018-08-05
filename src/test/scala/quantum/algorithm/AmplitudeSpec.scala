@@ -1,6 +1,7 @@
 package quantum.algorithm
 
 import org.scalatest.FlatSpec
+import quantum.algorithm.Grover._
 import quantum.domain.Gate.{H, I, Y, Z, controlledL, rot, wire, _}
 import quantum.domain.QState.{pure, s0, s1, _}
 import quantum.domain.Symbol.{Std, Word}
@@ -49,52 +50,44 @@ class AmplitudeSpec extends FlatSpec {
     state.probs
     state.hist
 
+    val result = state.measure(w => Word.toInt(Word(w.letters.take(3)))).outcome
+    println(result)
+    println(math.pow(math.sin(result/math.pow(2, 3)), 2))
+
     val estimates = Amplitude.estimate(state)
     println(estimates)
   }
 
-  "count" should "circuit" in {
+  "count" should "all states" in {
 
-    val op: Gate[Std, Std] = Y * Complex.i // -HZHZ
-    //val op: Gate[Std, Std] = (s: Std) => QState.pure(s) >>= H >=> Z >>= H >>= Z
+    val op: Gate[Std, Std] = I
 
-    def q(j: Int): Gate[Std, Std] = if (j % 2 == 0) I[Std] else op
+    def f(x: Int) = true
 
-    val n = 5
-    val circuit = Amplitude.run(n, op, q _)
+    def gf(shift: Int) =
+      wire(3 + shift, Z) _ >=> oracleL(f)(List(0, 1, 2).map { i => i + shift }, 3 + shift) >=> wire(3 + shift, Z) >=> invL((List(0, 1, 2) ++ List(3)).map { i => i + shift })
 
-    circuit.probs
-    circuit.hist
+    val g = gf(3)
 
-    val estimates = Amplitude.estimate(circuit, true)
-    println(estimates)
-  }
+    var state = pure(Word.fromInt(0, 7))
 
+    state = state >>= wire(6, op)
 
-  val zg: Gate[Std, Std] = (s0 >< s0) + (s0 >< s1)
-
-  def fib(n: Int): QState[Word[Std]] = {
-    var state = pure(Word.fromInt(0, n))
-    for (i <- 0 until n) state = state >>= wire(i, H)
-    for (i <- 0 until n - 1)  state = state >>= controlledL(Set(i), i + 1, zg)
-    state
-  }
-
-  "count" should "fib" in {
-
-    val op: Gate[Std, Std] = Y * Complex.i // -HZHZ
-    //val op: Gate[Std, Std] = (s: Std) => QState.pure(s) >>= H >=> Z >>= H >>= Z
-
-    def q(j: Int): Gate[Std, Std] = if (j % 2 == 0) I[Std] else op
-
-    for (i <- 1 to 5) {
-
-      val init = fib(i)
-      println(s"Fib(${i + 1}) = ${init.state.size}")
-      val circuit = Amplitude.run(op, q _, init)
-
-      val estimates = Amplitude.estimate(circuit, true)
-      println(estimates)
+    for (j <- (0 to 5)) {
+      state = state >>= wire(j, H)
     }
+
+    for (i <- 0 to 2) {
+      for (j <- 1 to math.pow(2, i).toInt)
+        state = state >>= controlledI(i, g)
+    }
+
+    state = state >>= QFT.iqftL(List(0, 1, 2))
+
+    state.hist
+
+    val result = state.measure(w => Word.toInt(Word(w.letters.take(3)))).outcome
+    println(result)
+    println(3*math.pow(math.sin(result/math.pow(2, 3)), 2))
   }
 }

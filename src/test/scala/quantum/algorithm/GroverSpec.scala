@@ -206,14 +206,6 @@ class GroverSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
     state.hist
   }
 
-  def controlledI(c: Int, g: Word[Std] => QState[Word[Std]])(s: Word[Std]): QState[Word[Std]] = {
-    s match {
-      case Word(Nil) => pure(Word(Nil))
-      case Word(letters) if letters(c) == S0 => pure(s)
-      case Word(letters) if letters(c) == S1 => g(s)
-    }
-  }
-
   "controlled g" should "work" in {
     def f(x: Int) = x == 5
 
