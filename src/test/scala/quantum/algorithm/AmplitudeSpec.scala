@@ -63,6 +63,10 @@ class AmplitudeSpec extends FlatSpec {
     val op: Gate[Std, Std] = I
 
     def f(x: Int) = true
+    //def f(x: Int) = x <= 3
+    //def f(x: Int) = x <= 3
+    //def f(n: Int): Boolean = (n & (n >>> 1)) == 0
+
 
     def gf(shift: Int) =
       wire(3 + shift, Z) _ >=> oracleL(f)(List(0, 1, 2).map { i => i + shift }, 3 + shift) >=> wire(3 + shift, Z) >=> invL((List(0, 1, 2) ++ List(3)).map { i => i + shift })
@@ -89,6 +93,6 @@ class AmplitudeSpec extends FlatSpec {
 
     val result = state.measure(w => Word.toInt(Word(w.letters.take(n_controls)))).outcome
     println(result)
-    println(3*math.pow(math.sin(result/math.pow(2, n_controls)), 2))
+    println(math.pow(2, 3)*math.pow(math.sin(math.Pi * result/math.pow(2, n_controls)), 2))
   }
 }
