@@ -81,10 +81,12 @@ class AmplitudeSpec extends FlatSpec {
     var state = pure(Word.fromInt(0, n_controls + n_targets + 1))
 
     //state = state >>= wire(n_controls + n_targets, op)
+    //state = state >>= fibL(n_targets)(n_controls)
 
     for (j <- (0 to n_controls + n_targets)) {
       state = state >>= wire(j, H)
     }
+    //state = state >>= QFT.qftL((0 to n_targets).toList)
 
     for (i <- 0 until n_controls) {
       for (j <- 1 to math.pow(2, i).toInt)
@@ -99,4 +101,16 @@ class AmplitudeSpec extends FlatSpec {
     println(result)
     println(math.pow(2, n_targets)*math.pow(math.sin(math.Pi * result/math.pow(2, n_controls)), 2))
   }
+
+  val zg: Gate[Std, Std] = (s0 >< s0) + (s0 >< s1)
+
+  def fibS(n: Int)(shift: Int)(s: QState[Word[Std]]): QState[Word[Std]] = {
+    var state = s
+    for (i <- 0 until n) state = state >>= wire(i + shift, H)
+    for (i <- 0 until n - 1)  state = state >>= controlledL(Set(i + shift), i + 1 + shift, zg)
+    state
+  }
+
+  def fibL(n: Int)(shift: Int)(s: Word[Std]): QState[Word[Std]] = fibS(n)(shift)(pure(s))
+
 }
