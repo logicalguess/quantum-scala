@@ -7,7 +7,7 @@ class QSpec extends FlatSpec {
 
   def collect(bins: List[(String, Complex)]): List[(String, Complex)] = {
     bins.groupBy(_._1).toList.map {
-      case (b, vs) => (b, vs.map(_._2).foldLeft(Complex.one)(Complex.plus))
+      case (b, vs) => (b, vs.map(_._2).foldLeft(Complex.zero)(Complex.plus))
     }
   }
 
@@ -21,10 +21,41 @@ class QSpec extends FlatSpec {
     b => bin1.map { case (b1, v1) => (b1, v1 * m.getOrElse(b, Complex.zero).conj) }
   }
 
+  def pure(b: String): List[(String, Complex)] = List(b -> Complex.one)
+
   "1" should "" in {
     val bins: List[(String, Complex)] = List("0" -> 1 / math.sqrt(2), "1" -> 1 / math.sqrt(2))
 
     assert((total(bins) - 1.0) < 0.001)
+  }
 
+  "2" should "" in {
+    def add(f: String => List[(String, Complex)], g: String => List[(String, Complex)]): String => List[(String, Complex)] =
+      b => collect(f(b) ++ g(b))
+
+    val s0 = pure("0")
+    val s1 = pure("1")
+
+    println(><(s1, s0)("0"))
+    println(><(s0, s1)("1"))
+
+    val X = add(><(s1, s0), ><(s0, s1))
+
+    println(X("0"))
+    println(X("1"))
+  }
+
+  "3" should "" in {
+    val S0 = List("0" -> Complex.one, "1" -> Complex.zero)
+    val S1 = List("0" -> Complex.zero, "1" -> Complex.one)
+
+    import quantum.domain.Complex.toComplex
+    val H = Map(
+      "0" -> List("0" -> toComplex(1 / math.sqrt(2)), "1" -> toComplex(1 / math.sqrt(2))),
+      "1" -> List("0" -> toComplex(1 / math.sqrt(2)), "1" -> toComplex(-1 / math.sqrt(2)))
+    )
+
+    val q = QState[String](S0)
+    println(q.fMap(H))
   }
 }

@@ -18,9 +18,14 @@ class ZeroSumSpec extends FlatSpec {
     }))
 
   def fMap(bins: List[(String, Int)], f: String => List[(String, Int)]) =
-    collect(bins.flatMap({ case (s, i) => List((s -> i)) ++ f(s) }))
+    collect(bins.flatMap({ case (b, v) => List((b -> v)) ++ f(b) }))
 
   def total(bins: List[(String, Int)]): Int = bins.map(_._2).foldLeft(0)(_ + _)
+
+  def ><(bin1: List[(String, Int)], bin2: List[(String, Int)]): String => List[(String, Int)] = {
+    val m = collect(bin2).toMap
+    b => bin1.map { case (b1, v1) => (b1, v1 - m.getOrElse(b, 0)) }
+  }
 
   "1" should "" in {
     val bins: List[(String, Int)] = List("a" -> 2, "b" -> 3, "c" -> 5, "d" -> -8, "e" -> -2)
@@ -45,5 +50,18 @@ class ZeroSumSpec extends FlatSpec {
     assert(total(step3) == 0)
     assert(step3.contains("a" -> 1))
     assert(step3.contains("b" -> 4))
+
+  }
+
+  "2" should "" in {
+    val bins: List[(String, Double)] = List("a" -> 2, "b" -> 3, "c" -> 5, "d" -> -8, "e" -> -2)
+
+    val z = ZState[String](bins)
+    val change = List("a" -> -1.0, "b" -> 1.0)
+
+    val step = z.fMap(Map("a" -> change, "b" -> Nil, "c" -> Nil, "d" -> Nil, "e" -> Nil))
+
+    assert(step.bins.contains("a" -> 1.0))
+    assert(step.bins.contains("b" -> 4.0))
   }
 }
