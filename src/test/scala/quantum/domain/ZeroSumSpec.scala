@@ -6,15 +6,15 @@ class ZeroSumSpec extends FlatSpec {
 
   def collect(bins: List[(String, Int)]): List[(String, Int)] = {
     bins.groupBy(_._1).toList.map {
-      case (a, azs) => (a, azs.map(_._2).foldLeft(0)(_ + _))
+      case (b, vs) => (b, vs.map(_._2).foldLeft(0)(_ + _))
     }
   }
 
   def flatMap(bins: List[(String, Int)], f: PartialFunction[String, List[(String, Int)]]) =
     collect(bins.flatMap({
-      case (s, i) if f.isDefinedAt(s) => List((s -> i)) ++ f(s)
-      // case (s, i) if f.isDefinedAt(s) => List((s -> (i - total(f(s))))) ++ f(s)
-      case (s, i) => List((s -> i))
+      case (b, v) if f.isDefinedAt(b) => List((b -> v)) ++ f(b)
+      // case (b, v) if f.isDefinedAt(b) => List((b -> (v - total(f(b))))) ++ f(b)
+      case (b, v) => List((b -> v))
     }))
 
   def fMap(bins: List[(String, Int)], f: String => List[(String, Int)]) =
