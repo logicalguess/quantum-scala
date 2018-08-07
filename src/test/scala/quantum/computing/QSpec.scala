@@ -56,6 +56,6 @@ class QSpec extends FlatSpec {
     )
 
     val q = QState[String](S0)
-    println(q.fMap(H))
+    println(q.transform(H))
   }
 }

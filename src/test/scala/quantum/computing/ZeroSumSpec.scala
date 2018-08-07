@@ -59,7 +59,7 @@ class ZeroSumSpec extends FlatSpec {
     val z = ZState[String](bins)
     val change = List("a" -> -1.0, "b" -> 1.0)
 
-    val step = z.fMap(Map("a" -> change, "b" -> Nil, "c" -> Nil, "d" -> Nil, "e" -> Nil))
+    val step = z.transform(Map("a" -> change, "b" -> Nil, "c" -> Nil, "d" -> Nil, "e" -> Nil))
 
     assert(step.bins.contains("a" -> 1.0))
     assert(step.bins.contains("b" -> 4.0))

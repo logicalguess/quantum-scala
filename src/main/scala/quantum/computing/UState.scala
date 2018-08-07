@@ -8,7 +8,7 @@ trait UState[S <: UState[S, B, V], B, V] {
 
   def create(bins: List[(B, V)]): S
 
-  def fMap(f: B => List[(B, V)]): S = {
+  def transform(f: B => List[(B, V)]): S = {
     create(collect(bins.flatMap({ case bv => process(bv, f) })))
   }
 
