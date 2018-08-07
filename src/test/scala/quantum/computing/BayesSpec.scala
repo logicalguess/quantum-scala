@@ -1,4 +1,4 @@
-package quantum.domain
+package quantum.computing
 
 import org.scalatest.FlatSpec
 
@@ -33,6 +33,12 @@ class BayesSpec extends FlatSpec {
     assert(total(change) == 1.0)
     assert(total(fMap(bins, Map("a" -> List("a" -> 0.2), "b" -> List("b" -> 0.8), "c" -> List("c" -> 0.0)))) == 1.0)
     assert(total(fMap(bins, Map("a" -> change, "b" -> Nil, "c" -> Nil))) == 1.0)
+
+    val change_a = List("a" -> 0.2, "b" -> 0.4, "c" -> 0.4)
+    val change_b = List("a" -> 0.1, "b" -> 0.8, "c" -> 0.1)
+    val change_c = List("a" -> 0.5, "b" -> 0.5, "c" -> 0.0)
+
+    //assert(fMap(bins, Map("a" -> change, "b" -> Nil, "c" -> Nil)) == fMap(bins, Map("a" -> change_a, "b" -> change_b, "c" -> change_c)))
 
   }
 }

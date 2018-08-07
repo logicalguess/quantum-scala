@@ -1,4 +1,4 @@
-package quantum.domain
+package quantum.computing
 
 import org.scalatest.FlatSpec
 
