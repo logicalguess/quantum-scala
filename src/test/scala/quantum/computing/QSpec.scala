@@ -50,7 +50,7 @@ class QSpec extends FlatSpec {
     val S1 = List("0" -> Complex.zero, "1" -> Complex.one)
 
     import quantum.domain.Complex.toComplex
-    
+
     val sq = toComplex(1 / math.sqrt(2))
     val H = Map(
       "0" -> List("0" -> sq, "1" -> sq),
