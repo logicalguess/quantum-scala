@@ -7,9 +7,10 @@ trait UState[S <: UState[S, B, V], B, V] {
   val plus: (V, V) => V
 
   def create(bins: List[(B, V)]): S
+  def normalize(bins: List[(B, V)]): List[(B, V)] = identity(bins)
 
-  def transform(f: B => List[(B, V)]): S = {
-    create(collect(bins.flatMap({ case bv => process(bv, f) })))
+  def >>=(f: B => List[(B, V)]): S = {
+    create(normalize(collect(bins.flatMap({ case bv => process(bv, f) }))))
   }
 
   private def collect(bins: List[(B, V)]): List[(B, V)] = {
@@ -27,8 +28,28 @@ case class ZState[B](bins: List[(B, Double)]) extends UState[ZState[B], B, Doubl
     case ((b, v), f) => List((b -> v)) ++ f(b)
   }
 
-  override def create(bins: List[(B, Double)]): ZState[B] = ZState(bins)
+  override def create(bins: List[(B, Double)]) = ZState(bins)
 }
+
+case class PState[B](bins: List[(B, Double)]) extends UState[PState[B], B, Double] {
+  override val zero: Double = 1.0
+  override val plus: (Double, Double) => Double = _ * _
+
+  override val process: ((B, Double), B => List[(B, Double)]) => List[(B, Double)] = {
+    case ((b, v), f) => List((b -> v)) ++ f(b)
+  }
+
+  override def normalize(bins: List[(B, Double)]): List[(B, Double)] = {
+    val sum = bins.map(_._2).foldLeft(0.0)(_ + _)
+    if (sum == 1.0) bins else bins.map {
+      case (b, v) => (b, v / sum)
+
+    }
+  }
+
+  override def create(bins: List[(B, Double)]) = PState(bins)
+}
+
 
 import quantum.domain.Complex
 
@@ -40,5 +61,5 @@ case class QState[B](bins: List[(B, Complex)]) extends UState[QState[B], B, Comp
     case ((b, v), f) => f(b).map { case (c, u) => (c, u * v) }
   }
 
-  override def create(bins: List[(B, Complex)]): QState[B] = QState(bins)
+  override def create(bins: List[(B, Complex)]) = QState(bins)
 }
