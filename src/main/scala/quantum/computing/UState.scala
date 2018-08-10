@@ -31,12 +31,23 @@ case class ZState[B](bins: List[(B, Double)]) extends UState[ZState[B], B, Doubl
   override def create(bins: List[(B, Double)]) = ZState(bins)
 }
 
+case class OState[B](bins: List[(B, Double)]) extends UState[OState[B], B, Double] {
+  override val zero: Double = 0.0
+  override val plus: (Double, Double) => Double = _ + _
+
+  override val process: ((B, Double), B => List[(B, Double)]) => List[(B, Double)] = {
+    case ((b, v), f) => List((b -> v)) ++ f(b)
+  }
+
+  override def create(bins: List[(B, Double)]) = OState(bins)
+}
+
 case class PState[B](bins: List[(B, Double)]) extends UState[PState[B], B, Double] {
   override val zero: Double = 1.0
   override val plus: (Double, Double) => Double = _ * _
 
   override val process: ((B, Double), B => List[(B, Double)]) => List[(B, Double)] = {
-    case ((b, v), f) => List((b -> v)) ++ f(b)
+    case ((b, v), f) => f(b).map { case (c, u) => (c, u * v) }
   }
 
   override def normalize(bins: List[(B, Double)]): List[(B, Double)] = {
