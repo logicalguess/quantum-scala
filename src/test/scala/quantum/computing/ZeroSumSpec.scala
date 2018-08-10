@@ -64,4 +64,10 @@ class ZeroSumSpec extends FlatSpec {
     assert(step.bins.contains("a" -> 1.0))
     assert(step.bins.contains("b" -> 4.0))
   }
+
+  "3" should "" in {
+    val bins: List[(String, Double)] = List("a" -> 2, "b" -> 3, "c" -> 5, "d" -> -8, "e" -> -2)
+
+    val z = OState[String](bins)
+  }
 }

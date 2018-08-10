@@ -2,7 +2,7 @@ package quantum.computing
 
 trait UState[S <: UState[S, B, V], B, V] {
   val bins: List[(B, V)]
-  val process: ((B, V), B => List[(B, V)]) => List[(B, V)]
+  val updateRule: ((B, V), B => List[(B, V)]) => List[(B, V)]
   val zero: V
   val plus: (V, V) => V
 
@@ -10,7 +10,7 @@ trait UState[S <: UState[S, B, V], B, V] {
   def normalize(bins: List[(B, V)]): List[(B, V)] = identity(bins)
 
   def >>=(f: B => List[(B, V)]): S = {
-    create(normalize(collect(bins.flatMap({ case bv => process(bv, f) }))))
+    create(normalize(collect(bins.flatMap({ case bv => updateRule(bv, f) }))))
   }
 
   private def collect(bins: List[(B, V)]): List[(B, V)] = {
@@ -24,7 +24,7 @@ case class ZState[B](bins: List[(B, Double)]) extends UState[ZState[B], B, Doubl
   override val zero: Double = 0.0
   override val plus: (Double, Double) => Double = _ + _
 
-  override val process: ((B, Double), B => List[(B, Double)]) => List[(B, Double)] = {
+  override val updateRule: ((B, Double), B => List[(B, Double)]) => List[(B, Double)] = {
     case ((b, v), f) => List((b -> v)) ++ f(b)
   }
 
@@ -35,7 +35,7 @@ case class OState[B](bins: List[(B, Double)]) extends UState[OState[B], B, Doubl
   override val zero: Double = 0.0
   override val plus: (Double, Double) => Double = _ + _
 
-  override val process: ((B, Double), B => List[(B, Double)]) => List[(B, Double)] = {
+  override val updateRule: ((B, Double), B => List[(B, Double)]) => List[(B, Double)] = {
     case ((b, v), f) => List((b -> v)) ++ f(b)
   }
 
@@ -46,7 +46,7 @@ case class PState[B](bins: List[(B, Double)]) extends UState[PState[B], B, Doubl
   override val zero: Double = 1.0
   override val plus: (Double, Double) => Double = _ * _
 
-  override val process: ((B, Double), B => List[(B, Double)]) => List[(B, Double)] = {
+  override val updateRule: ((B, Double), B => List[(B, Double)]) => List[(B, Double)] = {
     case ((b, v), f) => f(b).map { case (c, u) => (c, u * v) }
   }
 
@@ -68,7 +68,7 @@ case class QState[B](bins: List[(B, Complex)]) extends UState[QState[B], B, Comp
   override val zero: Complex = Complex.zero
   override val plus: (Complex, Complex) => Complex = Complex.plus
 
-  override val process: ((B, Complex), B => List[(B, Complex)]) => List[(B, Complex)] = {
+  override val updateRule: ((B, Complex), B => List[(B, Complex)]) => List[(B, Complex)] = {
     case ((b, v), f) => f(b).map { case (c, u) => (c, u * v) }
   }
 
