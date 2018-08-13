@@ -81,12 +81,15 @@ class AmplitudeSpec extends FlatSpec {
     var state = pure(Word.fromInt(0, n_controls + n_targets + 1))
 
     //state = state >>= wire(n_controls + n_targets, op)
-    //state = state >>= fibL(n_targets)(n_controls)
 
     for (j <- (0 to n_controls + n_targets)) {
       state = state >>= wire(j, H)
     }
     //state = state >>= QFT.qftL((0 to n_targets).toList)
+
+    //for (i <- n_controls until n_controls + n_targets - 1)  state = state >>= controlledL(Set(i), i + 1, ZERO)
+    //state.hist
+    //println(state.state.size)
 
     for (i <- 0 until n_controls) {
       for (j <- 1 to math.pow(2, i).toInt)
