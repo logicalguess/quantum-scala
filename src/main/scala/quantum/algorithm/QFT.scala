@@ -8,6 +8,18 @@ import quantum.domain.Symbol.{Std, Word}
 
 object QFT {
 
+  def iqftSR(qs: List[Int])(s: QState[Word[Std]]): QState[Word[Std]] = {
+    var state = s
+    for (j <- (0 to qs.size - 1)) {
+      state = state >>= wire(qs(j), H)
+      for (k <- (0 to j - 1))
+        state = state >>= controlledW(qs(j), qs(k), R(-math.Pi / math.pow(2, j - k)))
+    }
+    state
+  }
+
+  def iqftLR(qs: List[Int])(s: Word[Std]): QState[Word[Std]] = iqftSR(qs)(pure(s))
+
   def iqftS(qs: List[Int])(s: QState[Word[Std]]): QState[Word[Std]] = {
     var state = s
     for (j <- (0 to qs.size - 1).reverse) {

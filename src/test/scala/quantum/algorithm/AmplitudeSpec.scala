@@ -62,12 +62,12 @@ class AmplitudeSpec extends FlatSpec {
 
     val op: Gate[Std, Std] = I
 
-    def f(x: Int) = true
+    //def f(x: Int) = true
     //def f(x: Int) = x == 3
     //def f(x: Int) = x <= 3
-    //def f(n: Int): Boolean = (n & (n >>> 1)) == 0
+    def f(n: Int): Boolean = (n & (n >>> 1)) == 0
 
-    val n_controls = 2
+    val n_controls = 3
     val controls = (0 until n_controls).toList
 
     val n_targets = 3
@@ -95,10 +95,10 @@ class AmplitudeSpec extends FlatSpec {
       for (j <- 1 to math.pow(2, i).toInt)
         state = state >>= controlledI(i, g)
     }
-    state.hist
-
-    //state = state >>= QFT.iqftL(controls)
     //state.hist
+
+    state = state >>= QFT.iqftLR(controls)
+    state.hist
 
     val result = state.measure(w => Word.toInt(Word(w.letters.take(n_controls)))).outcome
     println(result)
