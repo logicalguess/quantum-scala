@@ -26,6 +26,8 @@ object Gate {
     helper(n, QState.pure(a))
   }
 
+  val ZERO: Gate[Std, Std] = (s0 >< s0) //+ (s0 >< s1)
+
   // Identity gate
   //def I[B <: Labeled](b: B): QState[B] = pure(b)
   def I[B <: Labeled]: Gate[B, B] = {s:B => pure(s)}

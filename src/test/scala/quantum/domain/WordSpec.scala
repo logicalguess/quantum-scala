@@ -258,32 +258,31 @@ class WordSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
     }
   }
 
-  val zg: Gate[Std, Std] = (s0 >< s0) + (s0 >< s1) * 0.00001
-
   def fib(n: Int): QState[Word[Std]] = {
     var state = pure(Word.fromInt(0, n))
     for (i <- 0 until n) state = state >>= wire(i, H)
-    for (i <- 0 until n - 1)  state = state >>= controlledL(Set(i), i + 1, zg)
+    for (i <- 0 until n - 1)  state = state >>= controlledL(Set(i), i + 1, ZERO)
     state
   }
 
   "fib" should "circuit" in {
 
-    for (n <- 1 to 5) {
+    for (n <- 1 to 16) {
       val q = fib(n)
       println(s"F($n) = ${q.state.size} : ${q}")
-      q.hist
+      //q.hist
     }
   }
 
   "fib" should "shots" in {
+    val max = 14
 
-    for (n <- 1 to 7) {
+    for (n <- 1 to max) {
 
       var results = scala.collection.mutable.Set[String]()
       val q = fib(n)
 
-      for (shot <- 1 to 256) {
+      for (shot <- 1 to math.pow(2, max + 1).toInt) {
         val m = q.measure(w => pure(w)).outcome
         results += m.toString
       }
