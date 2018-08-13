@@ -2,6 +2,7 @@ package quantum.domain
 
 import org.scalatest.FlatSpec
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import quantum.algorithm.QFT
 import quantum.domain.Gate._
 import quantum.domain.Labeled.Tensor
 import quantum.domain.QState._
@@ -257,7 +258,7 @@ class WordSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
     }
   }
 
-  val zg: Gate[Std, Std] = (s0 >< s0) + (s0 >< s1)
+  val zg: Gate[Std, Std] = (s0 >< s0) + (s0 >< s1) * 0.00001
 
   def fib(n: Int): QState[Word[Std]] = {
     var state = pure(Word.fromInt(0, n))
@@ -282,7 +283,7 @@ class WordSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
       var results = scala.collection.mutable.Set[String]()
       val q = fib(n)
 
-      for (shot <- 1 to 2048) {
+      for (shot <- 1 to 256) {
         val m = q.measure(w => pure(w)).outcome
         results += m.toString
       }
