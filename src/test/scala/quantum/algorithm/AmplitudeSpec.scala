@@ -58,19 +58,54 @@ class AmplitudeSpec extends FlatSpec {
     println(estimates)
   }
 
+  "fib" should "count" in {
+
+    val p = 0.3
+    val theta = math.asin(math.sqrt(p))
+
+    val op: Gate[Std, Std] = rot(theta)
+
+    val n_targets = 3
+
+    var state = pure(Word.fromInt(0, n_targets + 1))
+    //state = state >>= wire(n_targets, op)
+    for (j <- (0 until n_targets)) {
+      state = state >>= wire(j, H)
+    }
+
+    for (i <- 0 until n_targets - 1)  state = state >>= controlledL(Set(i), i + 1, ZERO)
+
+    for (j <- 0 until n_targets) {
+      state = state >>= controlledW(j, n_targets, rot(math.pow(2, j + 1) * theta))
+    }
+
+    state = state >>= QFT.iqftL((0 until n_targets).toList)
+
+    state.probs
+    state.hist
+
+    val result = state.measure(w => Word.toInt(Word(w.letters.take(3)))).outcome
+    println(result)
+    println(math.pow(math.sin(result/math.pow(2, 3)), 2))
+
+    val estimates = Amplitude.estimate(state)
+    println(estimates)
+  }
+
+
   "count" should "all states" in {
 
     val op: Gate[Std, Std] = I
 
     //def f(x: Int) = true
     //def f(x: Int) = x == 3
-    //def f(x: Int) = x <= 3
+    //def f(x: Int) = x <= 1
     def f(n: Int): Boolean = (n & (n >>> 1)) == 0
 
     val n_controls = 3
     val controls = (0 until n_controls).toList
 
-    val n_targets = 3
+    val n_targets = 2
     val targets = (0 until n_targets).toList
 
     def gf(shift: Int) =
@@ -87,7 +122,7 @@ class AmplitudeSpec extends FlatSpec {
     }
     //state = state >>= QFT.qftL((0 to n_targets).toList)
 
-    //for (i <- n_controls until n_controls + n_targets - 1)  state = state >>= controlledL(Set(i), i + 1, ZERO)
+    for (i <- n_controls until n_controls + n_targets - 1)  state = state >>= controlledL(Set(i), i + 1, ZERO)
     //state.hist
     //println(state.state.size) // 2^n_controls * F(n_targets) * 2
 
@@ -100,9 +135,17 @@ class AmplitudeSpec extends FlatSpec {
     state = state >>= QFT.iqftLR(controls)
     state.hist
 
-    val result = state.measure(w => Word.toInt(Word(w.letters.take(n_controls)))).outcome
-    println(result)
-    println(math.pow(2, n_targets)*math.pow(math.sin(math.Pi * result/math.pow(2, n_controls)), 2))
+    //val result = state.measure(w => Word.toInt(Word(w.letters.take(n_controls)))).outcome
+    //println(result)
+    //println(math.pow(2, n_targets)*math.pow(math.sin(math.Pi * result/math.pow(2, n_controls)), 2))
+
+    val top = state.state.sortBy(_._2.norm2).reverse
+    val ints = top.map { case (w, a) => (Word.toInt(Word(w.letters.take(n_controls))), a.norm2) }
+    println(ints)
+
+    println(ints.map { case (i, p) => (math.pow(2, n_targets)*math.pow(math.sin(math.Pi * i/math.pow(2, n_controls)), 2), p)})
+
+
   }
 
   def fibS(n: Int)(shift: Int)(s: QState[Word[Std]]): QState[Word[Std]] = {
