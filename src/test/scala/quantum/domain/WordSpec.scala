@@ -2,7 +2,7 @@ package quantum.domain
 
 import org.scalatest.FlatSpec
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
-import quantum.algorithm.QFT
+import quantum.algorithm.Amplitude
 import quantum.domain.Gate._
 import quantum.domain.Labeled.Tensor
 import quantum.domain.QState._
@@ -328,6 +328,52 @@ class WordSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
     }
   }
 
+  "quantum" should "count" in {
+    def anglef(bits: Int) = 0.01
+
+    def oracle(f: Int => Boolean)(s: Word[Std]): QState[Word[Std]] = {
+      val size = s.letters.size
+      val x = Word.toInt(Word(s.letters.take(size - 1)))
+
+      // set the last bit to 1 if oracle is true
+//      val fx = if (f(x)) S1 else S0
+//      val state = pure(Word[Std](s.letters.take(size - 1) ++ List(fx)))
+//      state
+
+      val state = pure(s)
+      println(s + " -> " + f(x))
+      if (f(x)) state else state >>= wire(size - 1, rot(math.Pi/4))
+    }
+
+    //def f(x: Int) = true
+    //def f(x: Int) = x == 3
+    //def f(x: Int) = x <= 1
+    def f(n: Int): Boolean = (n & (n >>> 1)) == 0
+
+    val width = 3
+    var state = pure(Word[Std](List.fill(width)(S0) ++ List(S1)))
+
+    for (j <- (0 to width)) {
+      state = state >>= wire(j, H)
+    }
+
+    state = state >>= oracle(f)
+    println(state)
+    state.hist
+
+    //prob of last bit being 1
+//    val prob = probLastBitOne(state, width)
+//    println(prob)
+//    println(probToInt(prob, anglef(width), 3))
+
+    val top = state.state.filter({ case (w, a) => w.letters.last == S1} ).sortBy(_._2.norm2).reverse
+    val ints = top.map { case (w, a) => (Word.toInt(Word(w.letters.take(width))), a.norm2) }
+    println(ints)
+
+    val estimates = Amplitude.estimate(state, true)
+    println(estimates.maxBy(_._2))
+  }
+
 
   "count" should "circuit2" in {
 
@@ -338,6 +384,7 @@ class WordSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
 
       var state = pure(Word.fromInt(0, bits + 1))
       for (i <- 0 until bits) state = state >>= wire(i, H)
+      //for (i <- 0 until bits - 1)  state = state >>= controlledL(Set(i), i + 1, ZERO)
       for (i <- 0 until bits) state = state >>= controlledL(Set(i), bits, rot(angle))
 
       state
