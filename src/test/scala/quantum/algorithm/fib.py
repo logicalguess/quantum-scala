@@ -1,7 +1,8 @@
 import numpy as np
 
 # importing QISKit
-from qiskit import QuantumCircuit, ClassicalRegister, QuantumRegister, execute, tools
+from qiskit import QuantumCircuit, ClassicalRegister, QuantumRegister, execute
+from qiskit.tools import visualization
 
 
 def cry(theta, qc, q_control, q_target):
@@ -31,11 +32,12 @@ def fib_circuit(n):
 
 def run(n):
     qc = fib_circuit(n)
+    # visualization.plot_circuit(qc)
     job = execute([qc], backend='local_qasm_simulator', shots=int(np.power(2, n + 2)))
     result = job.result()
     counts = result.get_counts()
     print("F(", n, ") = ", len(counts))
-    #tools.visualization.plot_histogram(counts)
+    # visualization.plot_histogram(counts)
 
 
 if __name__ == "__main__":
