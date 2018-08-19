@@ -41,6 +41,15 @@ class SingleQbitSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
     s.hist
   }
 
+  "outer product" should "" in forAll { s: QState[Std] =>
+    val state0 = s >>= (s0 >< s)
+    assert(state0(S1) == Complex.zero)
+    assert(state0(S1).im == 0.0)
+
+    val state1 = s >>= (s1 >< s)
+    assert(state1(S0) == Complex.zero)
+    assert(state1(S0).im == 0.0)  }
+
   "I|0>" should "be |0>" in {
     val s = I[Std](S0)
 
