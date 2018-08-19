@@ -29,7 +29,7 @@ class BayesSpec extends FlatSpec {
     assert(normalize(bins) == bins)
     assert((collect(bins ++ List("a" -> 0.2)).filter(t => (t._1 == "a")).head._2 - 0.2) < 0.0001)
 
-    val change = List("a" -> 0.2, "b" -> 0.8, "c" -> 0.0) // likelihoods of certain data point
+    val change = List("a" -> 0.2, "b" -> 0.8, "c" -> 0.0) // likelihoods of a given data point
     assert(total(change) == 1.0)
     assert(total(fMap(bins, Map("a" -> List("a" -> 0.2), "b" -> List("b" -> 0.8), "c" -> List("c" -> 0.0)))) == 1.0)
     assert(total(fMap(bins, Map("a" -> change, "b" -> Nil, "c" -> Nil))) == 1.0)

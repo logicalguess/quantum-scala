@@ -52,6 +52,7 @@ case class PState[B](bins: List[(B, Double)]) extends UState[PState[B], B, Doubl
 
   override val updateRule: ((B, Double), B => List[(B, Double)]) => List[(B, Double)] = {
     case ((b, v), f) => f(b).map { case (c, u) => (c, u * v) }
+    //case ((b, v), f) => List((b -> v)) ++ f(b)  // both work
   }
 
   override val normalizeRule = { bs: List[(B, Double)] =>
