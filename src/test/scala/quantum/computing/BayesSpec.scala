@@ -86,7 +86,10 @@ class BayesSpec extends FlatSpec {
     def likelihood(data: Int)(hypo: Int) =
       if (hypo < data) 0.0 else 1.0 / hypo
 
-    implicit val hypos = List(4, 6, 8, 12, 20)
+    val hypos = List(4, 6, 8, 12, 20)
+
+    implicit def dataPointToChange(data: Int) =
+      likelihoodFunctionToChange(likelihood(data))(hypos)
 
     val bins: List[(Int, Double)] = hypos.map { h => (h, 1.0) }
     val prior = PState(bins).normalize()
@@ -95,18 +98,12 @@ class BayesSpec extends FlatSpec {
 
     println()
     println("After a 6 is rolled:")
-    val posterior = prior >>= likelihoodFunctionToChange(likelihood(6))
+    val posterior = prior >>= 6
     printChart(posterior)
 
     println()
     println("After 6, 8, 7, 7, 5, 4 are rolled after the first 6:")
-    val posterior2 = posterior >>=
-      likelihoodFunctionToChange(likelihood(6)) >>=
-      likelihoodFunctionToChange(likelihood(8)) >>=
-      likelihoodFunctionToChange(likelihood(7)) >>=
-      likelihoodFunctionToChange(likelihood(7)) >>=
-      likelihoodFunctionToChange(likelihood(5)) >>=
-      likelihoodFunctionToChange(likelihood(4))
+    val posterior2 = posterior >>= 6 >>= 8 >>= 7 >>= 7 >>= 5 >>= 4
     printChart(posterior2)
 
   }

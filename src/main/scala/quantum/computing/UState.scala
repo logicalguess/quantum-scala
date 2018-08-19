@@ -3,11 +3,11 @@ package quantum.computing
 trait UState[+This <: UState[This, B, V], B, V] {
   val bins: List[(B, V)]
   val updateRule: ((B, V), B => List[(B, V)]) => List[(B, V)]
+  val normalizeRule: List[(B, V)] => List[(B, V)] = identity
   val zero: V
   val plus: (V, V) => V
 
   def create(bins: List[(B, V)]): This
-  def normalizeRule(bins: List[(B, V)]): List[(B, V)] = identity(bins)
   def normalize(): This = create(normalizeRule(bins))
 
   def flatMap(f: B => List[(B, V)]): This = {
@@ -53,9 +53,9 @@ case class PState[B](bins: List[(B, Double)]) extends UState[PState[B], B, Doubl
     case ((b, v), f) =>  f(b).map { case (c, u) => (c, u * v) }
   }
 
-  override def normalizeRule(bins: List[(B, Double)]): List[(B, Double)] = {
-    val sum = bins.map(_._2).foldLeft(0.0)(_ + _)
-    if (sum == 1.0) bins else bins.map {
+  override val normalizeRule  = { bs: List[(B, Double)] =>
+    val sum = bs.map(_._2).foldLeft(0.0)(_ + _)
+    if (sum == 1.0) bins else bs.map {
       case (b, v) => (b, v / sum)
 
     }
