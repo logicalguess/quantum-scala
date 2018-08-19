@@ -33,19 +33,23 @@ class BayesSpec extends FlatSpec {
     assert(total(change) == 1.0)
     assert(total(fMap(bins, Map("a" -> List("a" -> 0.2), "b" -> List("b" -> 0.8), "c" -> List("c" -> 0.0)))) == 1.0)
     assert(total(fMap(bins, Map("a" -> change, "b" -> Nil, "c" -> Nil))) == 1.0)
-
-    val change_a = List("a" -> 0.2, "b" -> 0.4, "c" -> 0.4)
-    val change_b = List("a" -> 0.1, "b" -> 0.8, "c" -> 0.1)
-    val change_c = List("a" -> 0.5, "b" -> 0.5, "c" -> 0.0)
-
-    //assert(fMap(bins, Map("a" -> change, "b" -> Nil, "c" -> Nil)) == fMap(bins, Map("a" -> change_a, "b" -> change_b, "c" -> change_c)))
   }
 
   "2" should "" in {
+    implicit def likelihoodsToChange(ls: List[(String, Double)]): Map[String, List[(String, Double)]] = {
+      val z: List[(String, List[(String, Double)])] = Nil
+      ls.foldLeft(z) { case (buffer, (b, v)) => buffer ++ List((b -> List((b -> v)))) }.toMap
+    }
+
     val bins: List[(String, Double)] = List("a" -> 0.1, "b" -> 0.3, "c" -> 0.6)
     val p = PState(bins)
 
-    val change = List("a" -> 0.2, "b" -> 0.8, "c" -> 0.0) // likelihoods of certain data point
-    println(p.>>=(Map("a" -> change, "b" -> Nil, "c" -> Nil)))
+    val change = Map("a" -> List("a" -> 0.2), "b" -> List("b" -> 0.7), "c" -> List("c" -> 0.0))
+    println(p >>= change)
+
+    val likelihoods = List("a" -> 0.2, "b" -> 0.7, "c" -> 0.0) // likelihoods of certain data point
+    println( p >>= likelihoods)
+
+    assert ((p >>= likelihoods) == (p >>= change))
   }
 }

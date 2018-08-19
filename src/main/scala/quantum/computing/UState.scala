@@ -1,19 +1,21 @@
 package quantum.computing
 
-trait UState[S <: UState[S, B, V], B, V] {
+trait UState[+This <: UState[This, B, V], B, V] {
   val bins: List[(B, V)]
   val updateRule: ((B, V), B => List[(B, V)]) => List[(B, V)]
   val zero: V
   val plus: (V, V) => V
 
-  def create(bins: List[(B, V)]): S
+  def create(bins: List[(B, V)]): This
   def normalize(bins: List[(B, V)]): List[(B, V)] = identity(bins)
 
-  def >>=(f: B => List[(B, V)]): S = {
+  def flatMap(f: B => List[(B, V)]): This = {
     create(normalize(collect(bins.flatMap({ case bv => updateRule(bv, f) }))))
   }
 
-  private def collect(bins: List[(B, V)]): List[(B, V)] = {
+  def >>=(f: B => List[(B, V)]): This = flatMap(f)
+
+    private def collect(bins: List[(B, V)]): List[(B, V)] = {
     bins.groupBy(_._1).toList.map {
       case (b, vs) => (b, vs.map(_._2).foldLeft(zero)(plus))
     }
@@ -47,7 +49,7 @@ case class PState[B](bins: List[(B, Double)]) extends UState[PState[B], B, Doubl
   override val plus: (Double, Double) => Double = _ * _
 
   override val updateRule: ((B, Double), B => List[(B, Double)]) => List[(B, Double)] = {
-    case ((b, v), f) => f(b).map { case (c, u) => (c, u * v) }
+    case ((b, v), f) =>  f(b).map { case (c, u) => (c, u * v) }
   }
 
   override def normalize(bins: List[(B, Double)]): List[(B, Double)] = {
@@ -60,7 +62,6 @@ case class PState[B](bins: List[(B, Double)]) extends UState[PState[B], B, Doubl
 
   override def create(bins: List[(B, Double)]) = PState(bins)
 }
-
 
 import quantum.domain.Complex
 
