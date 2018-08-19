@@ -2,10 +2,10 @@ package quantum.algorithm
 
 import org.scalatest.FlatSpec
 import quantum.algorithm.Grover._
-import quantum.domain.Gate.{H, I, Y, Z, controlledL, rot, wire, _}
-import quantum.domain.QState.{pure, s0, s1, _}
+import quantum.domain.Gate.{H, I, Z, controlledL, rot, wire, _}
+import quantum.domain.QState.pure
 import quantum.domain.Symbol.{Std, Word}
-import quantum.domain.{Complex, Gate, QState}
+import quantum.domain.{Gate, QState}
 
 class AmplitudeSpec extends FlatSpec {
 
@@ -92,7 +92,6 @@ class AmplitudeSpec extends FlatSpec {
     println(estimates)
   }
 
-
   "count" should "all states" in {
 
     val op: Gate[Std, Std] = I
@@ -105,7 +104,7 @@ class AmplitudeSpec extends FlatSpec {
     val n_controls = 3
     val controls = (0 until n_controls).toList
 
-    val n_targets = 2
+    val n_targets = 3
     val targets = (0 until n_targets).toList
 
     def gf(shift: Int) =
@@ -122,7 +121,7 @@ class AmplitudeSpec extends FlatSpec {
     }
     //state = state >>= QFT.qftL((0 to n_targets).toList)
 
-    for (i <- n_controls until n_controls + n_targets - 1)  state = state >>= controlledL(Set(i), i + 1, ZERO)
+    //for (i <- n_controls until n_controls + n_targets - 1)  state = state >>= controlledL(Set(i), i + 1, ZERO)
     //state.hist
     //println(state.state.size) // 2^n_controls * F(n_targets) * 2
 

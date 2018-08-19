@@ -13,7 +13,7 @@ class BayesSpec extends FlatSpec {
   def normalize(bins: List[(String, Double)]): List[(String, Double)] = {
     val sum = total(bins)
     if (sum == 1.0) bins else bins.map {
-      case (b, v) => (b, v/sum)
+      case (b, v) => (b, v / sum)
     }
   }
 
@@ -35,11 +35,19 @@ class BayesSpec extends FlatSpec {
     assert(total(fMap(bins, Map("a" -> change, "b" -> Nil, "c" -> Nil))) == 1.0)
   }
 
-  "2" should "" in {
-    implicit def likelihoodsToChange(ls: List[(String, Double)]): Map[String, List[(String, Double)]] = {
-      val z: List[(String, List[(String, Double)])] = Nil
+
+  implicit def likelihoodFunctionToChange[K](lf: Function[K, Double])(implicit hypos: List[K]): Map[K, List[(K, Double)]] = {
+    hypos.map { h => (h, lf(h)) }
+    //val z: List[(K, List[(K, Double)])] = Nil
+    //ls.foldLeft(z) { case (buffer, (b, v)) => buffer ++ List((b -> List((b -> v)))) }.toMap
+  }
+
+    implicit def likelihoodMapToChange[K](ls: List[(K, Double)]): Map[K, List[(K, Double)]] = {
+      val z: List[(K, List[(K, Double)])] = Nil
       ls.foldLeft(z) { case (buffer, (b, v)) => buffer ++ List((b -> List((b -> v)))) }.toMap
     }
+
+  "2" should "" in {
 
     val bins: List[(String, Double)] = List("a" -> 0.1, "b" -> 0.3, "c" -> 0.6)
     val p = PState(bins)
@@ -48,8 +56,58 @@ class BayesSpec extends FlatSpec {
     println(p >>= change)
 
     val likelihoods = List("a" -> 0.2, "b" -> 0.7, "c" -> 0.0) // likelihoods of certain data point
-    println( p >>= likelihoods)
+    println(p >>= likelihoods)
 
-    assert ((p >>= likelihoods) == (p >>= change))
+    assert((p >>= likelihoods) == (p >>= change))
+  }
+
+  def printChart[K](hist: Map[K, Double])(implicit ord: Ordering[K]) {
+    def pad(str: String, n: Int): String =
+      if (str.length > n) str.substring(0, n) else str + (" " * (n - str.length))
+
+    if (hist.nonEmpty) {
+      val keyLen = hist.keys.map(_.toString.length).max
+      hist.toSeq.sortBy(_._1).map {
+        case (h, prob) =>
+          pad(h.toString, keyLen).mkString + " " +
+            pad(prob.toString, 6) + " " +
+            ("#" * (50 * prob).toInt)
+      }.foreach(println)
+    }
+  }
+
+  def printChart[K](state: PState[K])(implicit ord: Ordering[K]): Unit = {
+    state match {
+      case PState(bins) => printChart(bins.toMap)
+    }
+  }
+
+  "3" should "dice" in {
+    def likelihood(data: Int)(hypo: Int) =
+      if (hypo < data) 0.0 else 1.0 / hypo
+
+    implicit val hypos = List(4, 6, 8, 12, 20)
+
+    val bins: List[(Int, Double)] = hypos.map { h => (h, 1.0) }
+    val prior = PState(bins).normalize()
+    println("Priors:")
+    printChart(prior)
+
+    println()
+    println("After a 6 is rolled:")
+    val posterior = prior >>= likelihoodFunctionToChange(likelihood(6))
+    printChart(posterior)
+
+    println()
+    println("After 6, 8, 7, 7, 5, 4 are rolled after the first 6:")
+    val posterior2 = posterior >>=
+      likelihoodFunctionToChange(likelihood(6)) >>=
+      likelihoodFunctionToChange(likelihood(8)) >>=
+      likelihoodFunctionToChange(likelihood(7)) >>=
+      likelihoodFunctionToChange(likelihood(7)) >>=
+      likelihoodFunctionToChange(likelihood(5)) >>=
+      likelihoodFunctionToChange(likelihood(4))
+    printChart(posterior2)
+
   }
 }
