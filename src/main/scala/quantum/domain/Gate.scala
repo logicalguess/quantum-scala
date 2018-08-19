@@ -60,7 +60,6 @@ object Gate {
   def R(theta: Double): Gate[Std, Std] = (s0 >< s0) + (s1 * Complex.one.rot(theta) >< s1)
 
   // Rotation gate
-  val tau = 2 * math.Pi
   def rot(theta: Double): Gate[Std, Std] = {
     val s0a = s0 * math.cos(theta) + s1 * math.sin(theta)
     val s1a = s0 * -math.sin(theta) + s1 * math.cos(theta)
@@ -68,6 +67,7 @@ object Gate {
   }
 
   // Square root of NOT gate
+  val tau = 2 * math.Pi
   val sqrtNot: Gate[Std, Std] = rot(tau/8)
 
   def Rx(theta: Double): Gate[Std, Std] = I[Std] * math.cos(theta / 2) - X * Complex.i * math.sin(theta / 2)

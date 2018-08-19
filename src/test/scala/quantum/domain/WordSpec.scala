@@ -262,6 +262,9 @@ class WordSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
     var state = pure(Word.fromInt(0, n))
     for (i <- 0 until n) state = state >>= wire(i, H)
     for (i <- 0 until n - 1)  state = state >>= controlledL(Set(i), i + 1, ZERO)
+    //for (i <- 0 until n - 1)  state = state >>= wire(i + 1, Ry(-math.Pi/4)) >>= controlledL(Set(i), i + 1, X) >>=
+    //  wire(i + 1, Ry(math.Pi/4)) >>= controlledL(Set(i), i + 1, X)
+
     state
   }
 
@@ -269,6 +272,7 @@ class WordSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
 
     for (n <- 1 to 16) {
       val q = fib(n)
+      //val possibleStates = q.state.filter({ case (w, a) => a.norm2 > 0.000001 })
       println(s"F($n) = ${q.state.size} : ${q}")
       //q.hist
     }
