@@ -300,9 +300,9 @@ class WordSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
   def probLastBitOne(state: QState[Word[Std]], width: Int) = state(Word.fromInt(2 * (width - 1) + 1, width)).norm2
 
   def probToInt(prob: Double, angle: Double, bits: Int): Int =
-    (math.asin(math.sqrt(prob)*math.pow(2, bits/2.0))/angle).floatValue().intValue()
+    (math.asin(math.sqrt(prob*math.pow(2, bits)))/angle).round.toInt
 
-  def counter(k: Int, angle: Double, bits: Int): Double = math.pow(math.sin(k*angle)/math.pow(2, bits/2.0), 2)
+  def counter(k: Int, angle: Double, bits: Int): Double = math.pow(math.sin(k*angle), 2)/math.pow(2, bits)
 
   "count ones" should "single input" in {
     def anglef(bits: Int) = 1 / math.pow(2, bits)
@@ -315,12 +315,15 @@ class WordSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
       state(Word.fromInt(2 * i + 1, width)).norm2
     }
 
+    def probToInt(prob: Double, angle: Double, bits: Int): Int =
+      (math.asin(math.sqrt(prob))/angle).round.toInt
+
     for (w <- 2 to 15) {
       println(w)
+      val angle = anglef(w)
       for (i <- 0 until math.pow(2, w - 1).toInt) {
-        //val count: Int = probToInt(ones(i, w), anglef(w), w)
-        //println(Word.fromInt(i, w - 1) + " -> " +  count)
-        assert(trunc(ones(i, w), 9) == trunc(math.pow(2, w) * counter(Integer.bitCount(i), anglef(w), w), 9))
+        assert(trunc(ones(i, w), 9) == trunc(math.pow(math.sin(Integer.bitCount(i)*angle), 2), 9))
+        assert(Integer.bitCount(i) == probToInt(ones(i, w), angle, w))
       }
     }
   }
@@ -335,6 +338,9 @@ class WordSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
       state
     }
 
+    def probToInt(prob: Double, angle: Double, bits: Int): Int =
+      (math.asin(math.sqrt(prob*math.pow(2, bits - 1)))/angle).round.toInt
+
     for (n <- 2 to 15) {
       println(n)
       val angle = anglef(n)
@@ -345,7 +351,7 @@ class WordSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
         val prob = state(Word.fromInt(2 * k + 1, n)).norm2
 
         assert(trunc(prob, 9) == trunc(2 * counter(Integer.bitCount(k), angle, n), 9))
-        //assert(k == probToInt(prob, angle, n))
+        assert(Integer.bitCount(k) == probToInt(prob, angle, n))
       }
     }
   }
