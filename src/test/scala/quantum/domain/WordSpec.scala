@@ -241,7 +241,7 @@ class WordSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
       assert(trunc(poly(i), 9) == trunc(sinp * sinp, 9))
     }
 
-    // 2 bits for input, 1 ancilla
+    // 2 bits for input, 1 ancilla, all inputs in superposition
     val circuit = pure(Word.fromInt(0, 3)) >>=
       wire(0, H) >>=
       wire(1, H) >>=
@@ -296,12 +296,59 @@ class WordSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
     }
   }
 
-  def probLastBitOne(state: QState[Word[Std]], width: Int) = state(Word.fromInt(2 * width - 1, width)).norm2
+  // |input>|1>
+  def probLastBitOne(state: QState[Word[Std]], width: Int) = state(Word.fromInt(2 * (width - 1) + 1, width)).norm2
 
   def probToInt(prob: Double, angle: Double, bits: Int): Int =
     (math.asin(math.sqrt(prob)*math.pow(2, bits/2.0))/angle).floatValue().intValue()
 
   def counter(k: Int, angle: Double, bits: Int): Double = math.pow(math.sin(k*angle)/math.pow(2, bits/2.0), 2)
+
+  "count ones" should "single input" in {
+    def anglef(bits: Int) = 1 / math.pow(2, bits)
+
+    def ones(i: Int, width: Int): Double = {
+      var state = pure(Word.fromInt(2 * i, width))
+      for (i <- 0 until width - 1) state = state >>= controlledL(Set(i), width - 1, rot(anglef(width)))
+
+      // probability last bit is 1
+      state(Word.fromInt(2 * i + 1, width)).norm2
+    }
+
+    for (w <- 2 to 15) {
+      println(w)
+      for (i <- 0 until math.pow(2, w - 1).toInt) {
+        //val count: Int = probToInt(ones(i, w), anglef(w), w)
+        //println(Word.fromInt(i, w - 1) + " -> " +  count)
+        assert(trunc(ones(i, w), 9) == trunc(math.pow(2, w) * counter(Integer.bitCount(i), anglef(w), w), 9))
+      }
+    }
+  }
+
+  "count ones" should "superposition of all inputs" in {
+    def anglef(bits: Int) = 1 / math.pow(2, bits)
+
+    def circuit(width: Int) = {
+      var state = pure(Word.fromInt(0, width))
+      for (i <- 0 until width - 1) state = state >>= wire(i, H)
+      for (i <- 0 until width - 1) state = state >>= controlledL(Set(i), width - 1, rot(anglef(width)))
+      state
+    }
+
+    for (n <- 2 to 15) {
+      println(n)
+      val angle = anglef(n)
+      val state = circuit(n)
+      val power: Int = math.pow(2, n - 1).toInt
+      for (k <- 0 until power) {
+        //prob of last bit being 1
+        val prob = state(Word.fromInt(2 * k + 1, n)).norm2
+
+        assert(trunc(prob, 9) == trunc(2 * counter(Integer.bitCount(k), angle, n), 9))
+        //assert(k == probToInt(prob, angle, n))
+      }
+    }
+  }
 
   "count" should "circuit" in {
 
@@ -317,17 +364,18 @@ class WordSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
       state
     }
 
-    for (n <- 0 to 5) {
+    for (n <- 0 to 8) {
+      println(n)
       val angle = anglef(n)
       val power: Int = math.pow(2, n).toInt
       for (k <- 0 to power) {
-        println(s"C($n) = ${circuit(n, k).state.size/2} : ${circuit(n, k)}")
+        //println(s"C($n) = ${circuit(n, k).state.size/2} : ${circuit(n, k)}")
 
         //prob of last bit being 1
         val prob = probLastBitOne(circuit(n, k), n + 1)
 
         assert(trunc(prob, 9) == trunc(counter(k, angle, n), 9))
-        assert(k == probToInt(prob, angle, n))
+        //assert(k == probToInt(prob, angle, n))
       }
     }
   }
