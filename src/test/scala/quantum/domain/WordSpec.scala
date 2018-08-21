@@ -296,9 +296,6 @@ class WordSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
     }
   }
 
-  // |input>|1>
-  def probLastBitOne(state: QState[Word[Std]], width: Int) = state(Word.fromInt(2 * (width - 1) + 1, width)).norm2
-
   def probToInt(prob: Double, angle: Double, bits: Int): Int =
     (math.asin(math.sqrt(prob*math.pow(2, bits)))/angle).round.toInt
 
@@ -360,6 +357,10 @@ class WordSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
 
     def anglef(bits: Int) = 1/math.pow(2, 5/*bits*/)
 
+    // |input>|1>
+    def probLastBitOne(state: QState[Word[Std]], width: Int) = state(Word.fromInt(2 * (width - 1) + 1, width)).norm2
+
+
     def circuit(bits: Int, k: Int): QState[Word[Std]] = {
       val angle = anglef(bits)
 
@@ -386,17 +387,43 @@ class WordSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
     }
   }
 
-  "quantum" should "count" in {
+  // convert an oracle to one that discriminates on the last bit
+  def oracleLQ(f: Int => Boolean)(s: Word[Std]): QState[Word[Std]] = {
+    val size = s.letters.size
+    val x = Word.toInt(Word(s.letters.take(size - 1)))
+
+    // set the last bit to 1 if oracle is true
+    val fx = if (f(x)) S1 else S0
+    val state = pure(Word[Std](s.letters.take(size - 1) ++ List(fx)))
+    state
+  }
+
+  "oracle" should "last bit 1" in {
+
+    val width = 3
+    var state = pure(Word[Std](List.fill(width)(S0) ++ List(S0)))
+
+    for (j <- (0 to width)) {
+      state = state >>= wire(j, H)
+    }
+
+    //def f(x: Int) = true
+    //def f(x: Int) = x == 3
+    //def f(x: Int) = x <= 1
+    def f(n: Int): Boolean = (n & (n >>> 1)) == 0
+
+    state = state >>= oracleLQ(f)
+    println(state)
+    state.hist
+
+  }
+
+  "oracle" should "ancilla qbit rotation" in {
     def anglef(bits: Int) = 0.01
 
     def oracle(f: Int => Boolean)(s: Word[Std]): QState[Word[Std]] = {
       val size = s.letters.size
       val x = Word.toInt(Word(s.letters.take(size - 1)))
-
-      // set the last bit to 1 if oracle is true
-//      val fx = if (f(x)) S1 else S0
-//      val state = pure(Word[Std](s.letters.take(size - 1) ++ List(fx)))
-//      state
 
       val state = pure(s)
       println(s + " -> " + f(x))
