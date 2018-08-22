@@ -75,7 +75,7 @@ class AmplitudeSpec extends FlatSpec {
     val A = oracleLQQ(f)(targets.map { i => i + n_controls }, n_targets + n_controls) _
 
     val g = wire(n_targets + n_controls, Z) _ >=> oracleL(f)(targets.map { i => i + n_controls }, n_targets + n_controls) >=>
-      wire(n_targets + n_controls, Z) >=> invL((targets ++ List(n_targets)).map { i => i + n_controls })
+      wire(n_targets + n_controls, Z) >=> invL(targets.map { i => i + n_controls })
 
     var state = pure(Word.fromInt(0, n_controls + n_targets + 1))
 
@@ -162,7 +162,7 @@ class AmplitudeSpec extends FlatSpec {
     val targets = (0 until n_targets).toList
 
     def gf(shift: Int) =
-      wire(n_targets + shift, Z) _ >=> oracleL(f)(targets.map { i => i + shift }, n_targets + shift) >=> wire(n_targets + shift, Z) >=> invL((targets ++ List(n_targets)).map { i => i + shift })
+      wire(n_targets + shift, Z) _ >=> oracleL(f)(targets.map { i => i + shift }, n_targets + shift) >=> wire(n_targets + shift, Z) >=> invL(targets.map { i => i + shift })
 
     val g = gf(n_controls)
 

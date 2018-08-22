@@ -42,7 +42,7 @@ object Grover {
     for (j <- (0 to size - 1)) {
       state = state >>= wire(qs(j), H) >>= wire(qs(j), X)
     }
-    state = state >>= controlledL((0 to size - 2).map(qs).toSet, qs(size - 1), rot(math.Pi))
+    state = state >>= controlledL((0 to size - 2).map(qs).toSet, qs(size - 1), Z)
     for (j <- (0 to size - 1)) {
       state = state >>= wire(qs(j), X) >>= wire(qs(j), H)
     }
@@ -52,7 +52,7 @@ object Grover {
   def invL(qs: List[Int])(s: Word[Std]): QState[Word[Std]] = invS(qs)(pure(s))
 
   def inv(s: Word[Std]): QState[Word[Std]] = {
-    invL((0 to s.letters.size - 1).toList)(s)
+    invL((0 to s.letters.size - 2).toList)(s)
 
 //    val size = s.letters.size
 //    var state = pure(s)

@@ -32,15 +32,15 @@ class GroverSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
     for (i <- 1 to 100) {
       val bits = (math.log(i) / math.log(2)).toInt + 1
       val w = Word.fromInt(i, bits)
+      val state = pure(w)
 
       val Hn: Gate[Word[Std], Word[Std]] = liftWord(H) _
-      val state = pure(w)
 
       def refl(width: Int) = {
         val s = pure(Word.fromInt(0, width)) >>= Hn
         (s >< s) * 2.0 - I[Word[Std]]
       }
-      assert(inv(w) == (pure(w) >>= refl(bits)))
+      assert((state >>= invL((0 until bits).toList) _) == (state >>= refl(bits)))
     }
   }
 
@@ -81,7 +81,7 @@ class GroverSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
 
     var state = pure(Word[Std](List.fill(3)(S0) ++ List(S1)))
     state = state >>= wire(0, H) >>= wire(1, H) >>= wire(2, H) >>= wire(3, H)
-    state = state >>= oracle(f) >>= inv
+    state = state >>= oracle(f) >>=  invL(List(0, 1, 2))
 
     println(state)
     state.hist
@@ -164,7 +164,7 @@ class GroverSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
     val targets = (n_controls to n_controls + n_targets - 1).toList
     val ancilla = n_controls + n_targets
 
-    val g = oracleL(f)(targets, ancilla) _ >=> invL(targets ++ List(ancilla))
+    val g = oracleL(f)(targets, ancilla) _ >=> invL(targets)
 
     var state = pure(Word[Std](List.fill(n_controls + n_targets)(S0) ++ List(S1)))
 
@@ -186,10 +186,10 @@ class GroverSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
     val n_controls = 1
     val n_targets = 3
 
-    val g0 = oracleL(f)(List(0, 1, 2), 3) _ >=> invL(List(0, 1, 2) ++ List(3))
+    val g0 = oracleL(f)(List(0, 1, 2), 3) _ >=> invL(List(0, 1, 2))
 
     def gf(shift: Int) =
-      oracleL(f)(List(0, 1, 2).map { i => i + shift }, 3 + shift) _ >=> invL((List(0, 1, 2) ++ List(3)).map { i => i + shift })
+      oracleL(f)(List(0, 1, 2).map { i => i + shift }, 3 + shift) _ >=> invL((List(0, 1, 2)).map { i => i + shift })
 
     lazy val g = gf(n_controls)
 
@@ -212,10 +212,10 @@ class GroverSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
     val n_controls = 2
     val n_targets = 3
 
-    val g0 = oracleL(f)(List(0, 1, 2), 3) _ >=> invL(List(0, 1, 2) ++ List(3))
+    val g0 = oracleL(f)(List(0, 1, 2), 3) _ >=> invL(List(0, 1, 2))
 
     def gf(shift: Int) =
-      oracleL(f)(List(0, 1, 2).map { i => i + shift }, 3 + shift) _ >=> invL((List(0, 1, 2) ++ List(3)).map { i => i + shift })
+      oracleL(f)(List(0, 1, 2).map { i => i + shift }, 3 + shift) _ >=> invL((List(0, 1, 2)).map { i => i + shift })
 
     lazy val g = gf(n_controls)
 
