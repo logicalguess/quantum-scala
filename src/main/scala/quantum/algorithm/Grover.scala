@@ -90,6 +90,30 @@ object Grover {
 //    state
   }
 
+  // convert an oracle to one that discriminates on the last bit
+  def oracleLQ(f: Int => Boolean)(s: Word[Std]): QState[Word[Std]] = {
+    oracleLQQ(f)((0 until s.letters.size - 1).toList, s.letters.size - 1)(s)
+//    val size = s.letters.size
+//    val x = Word.toInt(Word(s.letters.take(size - 1)))
+//
+//    // set the last bit to 1 if oracle is true
+//    val fx = if (f(x)) S1 else S0
+//    val state = pure(Word[Std](s.letters.take(size - 1) ++ List(fx)))
+//    state
+  }
+
+  def oracleLQQ(f: Int => Boolean)(q_in: List[Int], q_out: Int)(s: Word[Std]): QState[Word[Std]] = {
+    val letters = s.letters
+
+    val sub: List[Std] = letters.indices.collect { case i if q_in.contains(i) => letters(i) }.toList
+    val x = Word.toInt(Word(sub))
+
+    val fx = if (f(x)) S1 else S0
+
+    val state = pure(Word[Std](letters.updated(q_out, fx)))
+    state
+  }
+
   def grover(f: Int => Boolean)(width: Int): QState[Word[Std]] = {
     val r = (math.Pi * math.sqrt(math.pow(2, width)) / 4).toInt
     var state = pure(Word[Std](List.fill(width)(S0) ++ List(S1)))

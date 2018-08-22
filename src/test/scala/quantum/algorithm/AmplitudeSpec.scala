@@ -58,6 +58,60 @@ class AmplitudeSpec extends FlatSpec {
     println(estimates)
   }
 
+
+  "count" should "phase" in {
+
+    //def f(x: Int) = true
+    //def f(x: Int) = x == 3
+    //def f(x: Int) = x <= 1
+    def f(n: Int): Boolean = (n & (n >>> 1)) == 0
+
+    val n_controls = 3
+    val controls = (0 until n_controls).toList
+
+    val n_targets = 3
+    val targets = (0 until n_targets).toList
+
+    val A = oracleLQQ(f)(targets.map { i => i + n_controls }, n_targets + n_controls) _
+
+    val g = wire(n_targets + n_controls, Z) _ >=> oracleL(f)(targets.map { i => i + n_controls }, n_targets + n_controls) >=>
+      wire(n_targets + n_controls, Z) >=> invL((targets ++ List(n_targets)).map { i => i + n_controls })
+
+    var state = pure(Word.fromInt(0, n_controls + n_targets + 1))
+
+//    for (j <- (0 until n_controls)) {
+//      state = state >>= wire(j, H)
+//    }
+    state = state >>= QFT.qftL((0 until n_controls).toList)
+
+    for (j <- (n_controls until n_controls + n_targets)) {
+      state = state >>= wire(j, H)
+    }
+
+    state = state >>= A
+
+    for (i <- 0 until n_controls) {
+      for (j <- 1 to math.pow(2, i).toInt)
+        state = state >>= controlledI(i, g)
+    }
+    //state.hist
+
+    state = state >>= QFT.iqftL(controls)
+    println(state)
+    state.hist
+
+    //val result = state.measure(w => Word.toInt(Word(w.letters.take(n_controls)))).outcome
+    //println(result)
+    //println(math.pow(2, n_targets)*math.pow(math.sin(math.Pi * result/math.pow(2, n_controls)), 2))
+
+    val top = state.state.sortBy(_._2.norm2).reverse
+    val ints = top.map { case (w, a) => (Word.toInt(Word(w.letters.take(n_controls))), a.norm2) }
+    println(ints)
+
+    println(ints.map { case (i, p) => (math.pow(2, n_targets)*math.pow(math.sin(math.Pi * i/math.pow(2, n_controls)), 2), p)})
+
+  }
+
   "fib" should "count" in {
 
     val p = 0.3
@@ -144,16 +198,6 @@ class AmplitudeSpec extends FlatSpec {
 
     println(ints.map { case (i, p) => (math.pow(2, n_targets)*math.pow(math.sin(math.Pi * i/math.pow(2, n_controls)), 2), p)})
 
-
   }
-
-  def fibS(n: Int)(shift: Int)(s: QState[Word[Std]]): QState[Word[Std]] = {
-    var state = s
-    for (i <- 0 until n) state = state >>= wire(i + shift, H)
-    for (i <- 0 until n - 1)  state = state >>= controlledL(Set(i + shift), i + 1 + shift, ZERO)
-    state
-  }
-
-  def fibL(n: Int)(shift: Int)(s: Word[Std]): QState[Word[Std]] = fibS(n)(shift)(pure(s))
 
 }

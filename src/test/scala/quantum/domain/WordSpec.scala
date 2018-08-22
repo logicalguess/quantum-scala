@@ -2,7 +2,7 @@ package quantum.domain
 
 import org.scalatest.FlatSpec
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
-import quantum.algorithm.Amplitude
+import quantum.algorithm.{Amplitude, Grover}
 import quantum.domain.Gate._
 import quantum.domain.Labeled.Tensor
 import quantum.domain.QState._
@@ -387,17 +387,6 @@ class WordSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
     }
   }
 
-  // convert an oracle to one that discriminates on the last bit
-  def oracleLQ(f: Int => Boolean)(s: Word[Std]): QState[Word[Std]] = {
-    val size = s.letters.size
-    val x = Word.toInt(Word(s.letters.take(size - 1)))
-
-    // set the last bit to 1 if oracle is true
-    val fx = if (f(x)) S1 else S0
-    val state = pure(Word[Std](s.letters.take(size - 1) ++ List(fx)))
-    state
-  }
-
   "oracle" should "last bit 1" in {
 
     val width = 3
@@ -412,7 +401,7 @@ class WordSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
     //def f(x: Int) = x <= 1
     def f(n: Int): Boolean = (n & (n >>> 1)) == 0
 
-    state = state >>= oracleLQ(f)
+    state = state >>= Grover.oracleLQ(f)
     println(state)
     state.hist
 
