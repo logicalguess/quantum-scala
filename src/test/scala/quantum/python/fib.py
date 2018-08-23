@@ -80,8 +80,9 @@ if __name__ == "__main__":
     for i in range(1, 10):
         hist = get_counts(i, 'sim')
         print("F(", i, ") = ", len(hist))
+        #visualization.plot_histogram(hist)
 
-    # F( 1 ) =  2
+# F( 1 ) =  2
     # F( 2 ) =  3
     # F( 3 ) =  5
     # F( 4 ) =  8
