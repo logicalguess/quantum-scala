@@ -64,8 +64,7 @@ class AmplitudeSpec extends FlatSpec {
 
   "fib" should "count" in {
 
-    val p = 0.3
-    val theta = math.asin(math.sqrt(p))
+    val theta = math.asin(math.sqrt(0.25))
 
     val op: Gate[Std, Std] = rot(theta)
 

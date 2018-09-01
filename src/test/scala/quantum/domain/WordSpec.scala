@@ -4,7 +4,6 @@ import org.scalatest.FlatSpec
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import quantum.algorithm.{Amplitude, Grover}
 import quantum.domain.Gate._
-import quantum.domain.Labeled.Tensor
 import quantum.domain.QState._
 import quantum.domain.Symbol.{S0, S1, Std, Word}
 
@@ -91,173 +90,6 @@ class WordSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
     println(one * zeroes >>= lift1(wire(0, H) _) >>= lift2(wire(0, H) _) >>= lift2(wire(1, H) _))
   }
 
-  "word and tensor" should "circuit" in {
-    def crot(theta: Double)(s: Tensor[Std, Std]): QState[Tensor[Std, Std]] =
-      pure(s) >>= lift2(rot(theta / 2)) >>= cnot >>= lift2(rot(-theta / 2)) >>= cnot
-
-    val p = 0.3
-    val theta = math.asin(math.sqrt(p))
-
-    val start = pure(Word.fromInt(0, 3)) >>=
-      wire(0, H) _ >>= wire(1, H) _ >>= wire(2, rot(theta)) _
-
-    println(start)
-
-    val init: QState[Tensor[Tensor[Std, Std], Std]] = s0 * s0 * s0 >>=
-      lift12(lift12(H, H), rot(theta))
-
-    println(init)
-
-    val start1 = start >>=
-      cliftWord(0, 2, rot(2 * theta))
-
-    start1.probs
-
-    val stage1 = init >>=
-      lift1(swap) >>=
-      assoc2 >>=
-      lift2(crot(2 * theta)) >>=
-      assoc1 >>=
-      lift1(swap)
-
-    stage1.probs
-    //stage1.hist
-
-    val start2 = start1 >>=
-      cliftWord(1, 2, rot(4 * theta))
-
-    start2.probs
-
-    val stage2 = stage1 >>=
-      assoc2 >>=
-      lift2(crot(4 * theta)) >>=
-      assoc1
-
-    stage2.probs
-  }
-
-  "word" should "circuit1" in {
-
-    val p = 0.3
-    val theta = math.asin(math.sqrt(p))
-
-    val start = pure(Word.fromInt(0, 4)) >>=
-      wire(3, rot(theta)) _ >>= wire(0, H) _ >>= wire(1, H) _ >>= wire(2, H) _
-
-    val stage1 = start >>=
-      cliftWord(0, 3, rot(2 * theta)) >>=
-      cliftWord(1, 3, rot(4 * theta)) >>=
-      cliftWord(2, 3, rot(8 * theta))
-
-    stage1.probs
-    stage1.hist
-
-    var stage2 = stage1 >>=
-      wire(2, H) >>=
-      controlledW1(2, 1, R(-math.Pi / math.pow(2, 2 - 1))) >>=
-      controlledW1(2, 0, R(-math.Pi / math.pow(2, 2 - 0))) >>=
-      wire(1, H) >>=
-      controlledW1(1, 0, R(-math.Pi / math.pow(2, 1 - 0))) >>=
-      wire(0, H)
-
-    stage2.probs
-    stage2.hist
-  }
-
-  "word" should "circuit2" in {
-    val p = 0.3
-    val theta = math.asin(math.sqrt(p))
-
-    def hs(s: Word[Std]): QState[Word[Std]] = {
-      var state = pure(s)
-      for (j <- 0 to s.letters.size - 2)
-        state = state >>= wire(j, H)
-      state
-    }
-
-    def rots(s: Word[Std]): QState[Word[Std]] = {
-      var state = pure(s)
-      val last = s.letters.size - 1
-      for (j <- 0 to last - 1)
-        state = state >>= controlledW(j, last, rot(math.pow(2, j + 1) * theta))
-      state
-    }
-
-    def iqft(s: Word[Std]): QState[Word[Std]] = {
-      var state = pure(s)
-      for (j <- (0 to s.letters.size - 2).reverse) {
-        state = state >>= wire(j, H)
-        for (k <- (0 to j - 1).reverse)
-          state = state >>= controlledW(j, k, R(-math.Pi / math.pow(2, j - k)))
-      }
-      state
-    }
-
-    val start = pure(Word.fromInt(0, 4)) >>= wire(3, rot(theta)) >>= hs
-    val stage1 = start >>= rots
-    val stage2 = stage1 >>= iqft
-
-    //stage1.probs
-    //stage1.hist
-    stage2.probs
-    stage2.hist
-
-    val probs = for {
-      x <- stage2.state.sortBy(_._1)
-    } yield (Word.toInt(l => l.tail)(x._1) -> x._2.norm2) // Word.toInt(x._1) % 8
-
-    println(probs)
-    val mapped = probs.groupBy(_._1).mapValues { l => l.foldLeft(0.0) { case (s, (k, v)) => s + v } }
-    println(ListMap(mapped.toSeq.sortBy(_._1): _*))
-
-    val sinProbs = for {
-      x <- stage2.state.sortBy(_._1)
-    } yield (trunc(math.pow(math.sin(math.Pi * Word.toInt(l => l.tail)(x._1) / 8), 2), 3) -> x._2.norm2)
-    println(sinProbs)
-
-    val estimates = sinProbs.groupBy(_._1).mapValues { l => l.foldLeft(0.0) { case (s, (k, v)) => trunc(s + v, 3) } }
-    println(estimates)
-  }
-
-  "poly" should "a*x^2 + b*x + c" in {
-    val a = 1.0
-    val b = 1.0
-    val c = 1.0
-
-    // i = 0, 1, 2 or 3
-    def poly(i: Int): Double = {
-      val circuit = pure(Word.fromInt(2 * i, 3)) >>=
-        wire(2, rot(c)) >>=
-        controlledL(Set(0), 2, rot(4 * a + 2 * b)) >>=
-        controlledL(Set(0, 1), 2, rot(4 * a)) >>=
-        controlledL(Set(1), 2, rot(a + b))
-
-      // probability last bit is 1
-      circuit(Word.fromInt(2 * i + 1, 3)).norm2
-    }
-
-    for (i <- 0 to 3) {
-      val sinp = math.sin(a * i * i + b * i + c)
-      assert(trunc(poly(i), 9) == trunc(sinp * sinp, 9))
-    }
-
-    // 2 bits for input, 1 ancilla, all inputs in superposition
-    val circuit = pure(Word.fromInt(0, 3)) >>=
-      wire(0, H) >>=
-      wire(1, H) >>=
-      wire(2, rot(c)) >>=
-      controlledL(Set(0), 2, rot(4 * a + 2 * b)) >>=
-      controlledL(Set(0, 1), 2, rot(4 * a)) >>=
-      controlledL(Set(1), 2, rot(a + b))
-
-    for (i <- 0 to 3) {
-      // probability last bit is 1
-      val prob = circuit(Word.fromInt(2 * i + 1, 3)).norm2
-      val sinp = math.sin(a * i * i + b * i + c) / 2
-      assert(trunc(prob, 9) == trunc(sinp * sinp, 9))
-    }
-  }
-
   def fib(n: Int): QState[Word[Std]] = {
     var state = pure(Word.fromInt(0, n))
     for (i <- 0 until n) state = state >>= wire(i, H)
@@ -300,6 +132,57 @@ class WordSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
     (math.asin(math.sqrt(prob*math.pow(2, bits)))/angle).round.toInt
 
   def counter(k: Int, angle: Double, bits: Int): Double = math.pow(math.sin(k*angle), 2)/math.pow(2, bits)
+
+
+  "count consecutive ones" should "single input" in {
+    def anglef(bits: Int) = 1 / math.pow(2, bits)
+
+    def consecutiveOnes(i: Int, width: Int): Double = {
+      var state = pure(Word.fromInt(2 * i, width))
+      for (i <- 0 until width - 2) state = state >>= controlledL(Set(i, i + 1), width - 1, rot(anglef(width)))
+
+      // probability last bit is 1
+      state(Word.fromInt(2 * i + 1, width)).norm2
+    }
+
+    def probToInt(prob: Double, angle: Double, bits: Int): Int =
+      (math.asin(math.sqrt(prob))/angle).round.toInt
+
+    for (w <- 2 to 6) {
+      println(w)
+      val angle = anglef(w)
+      for (i <- 0 until math.pow(2, w - 1).toInt) {
+        println(Word.fromInt(i, w) + " -> " + probToInt(consecutiveOnes(i, w), angle, w))
+      }
+    }
+  }
+
+  "count consecutive ones" should "superposition of all inputs" in {
+    def anglef(bits: Int) = 1 / math.pow(2, bits)
+
+    def circuit(width: Int) = {
+      var state = pure(Word.fromInt(0, width))
+      for (i <- 0 until width - 1) state = state >>= wire(i, H)
+      for (i <- 0 until width - 2) state = state >>= controlledL(Set(i, i + 1), width - 1, rot(anglef(width)))
+      state
+    }
+
+    def probToInt(prob: Double, angle: Double, bits: Int): Int =
+      (math.asin(math.sqrt(prob*math.pow(2, bits - 1)))/angle).round.toInt
+
+    for (n <- 2 to 6) {
+      println(n)
+      val angle = anglef(n)
+      val state = circuit(n)
+      val power: Int = math.pow(2, n - 1).toInt
+      for (k <- 0 until power) {
+        //prob of last bit being 1
+        val prob = state(Word.fromInt(2 * k + 1, n)).norm2
+
+        println(Word.fromInt(k, n) + " -> " + probToInt(prob, angle, n))
+      }
+    }
+  }
 
   "count ones" should "single input" in {
     def anglef(bits: Int) = 1 / math.pow(2, bits)
