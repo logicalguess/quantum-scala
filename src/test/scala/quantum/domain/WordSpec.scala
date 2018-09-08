@@ -2,6 +2,7 @@ package quantum.domain
 
 import org.scalatest.FlatSpec
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import quantum.algorithm.Grover.{invL, oracle}
 import quantum.algorithm.{Amplitude, Grover}
 import quantum.domain.Gate._
 import quantum.domain.QState._
@@ -387,4 +388,48 @@ class WordSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
     for (i <- 0 until n) state = state >>= wire(i, X)
     println(state)
   }
+
+  "controlled0" should "grover" in {
+    val n = 4
+    var state = pure(Word.fromInt(0, n))
+
+    for (i <- 0 until n - 1) state = state >>= wire(i, X) >>= wire(i, H)
+
+    // oracle
+    state = state >>= controlledL(Set(n - 3, n - 2), n - 1, X)
+    state = state >>= wire(n - 1, Z)
+    state = state >>= controlledL(Set(n - 3, n - 2), n - 1, X)
+
+    // diffusion
+    state = state >>= controlledL0((0 until n - 2).toList.toSet, n - 2, X)
+
+    // oracle
+    state = state >>= controlledL(Set(n - 3, n - 2), n - 1, X)
+    state = state >>= wire(n - 1, Z)
+
+    println(state)
+    state.hist
+
+  }
+
+  "controlled1" should "grover" in {
+    val n = 3
+    val o = oracle(i => i == 3) _
+    var state = pure(Word[Std](List.fill(n - 1)(S0) ++ List(S1)))
+
+    for (i <- 0 until n) state = state >>= wire(i, H)
+
+    // oracle
+    state = state >>= o
+
+    // diffusion
+    for (i <- 0 until n - 1) state = state >>= wire(i, H) >>= wire(i, X)
+    state = state >>= controlledL((0 until n - 2).toList.toSet, n - 2, Z)
+    for (i <- 0 until n - 1) state = state >>= wire(i, X) >>= wire(i, H)
+
+    println(state)
+    state.hist
+
+  }
+
 }
