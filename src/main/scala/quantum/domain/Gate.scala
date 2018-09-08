@@ -187,6 +187,21 @@ object Gate {
     }
   }
 
+  def controlledL0(c: Set[Int], t: Int, g: Std => QState[Std])(s: Word[Std]): QState[Word[Std]] = {
+    s match {
+      case Word(Nil) => pure(Word(Nil))
+      case w if c.isEmpty => wire(t, g)(w)
+      case _ if c.contains(t) => throw new Error("target cannot be in the control set")
+      case _ if t == 0 => {
+        val size = s.letters.size
+        controlledL0(c.map { i => size - 1 - i }, size - 1 - t, g)(Word(s.letters.reverse)) >>= reverse _
+      }
+      case Word(S1 :: rest) if c.contains(0) => pure(Word(S1 :: rest))
+      case Word(S0 :: rest) if c.contains(0) => s0 *: controlledL0((c - 0).map { i => i - 1 }, t - 1, g)(Word(rest))
+      case Word(h :: rest) if !c.contains(0) => pure(h) *: controlledL0(c.map { i => i - 1 }, t - 1, g)(Word(rest))
+    }
+  }
+
   def controlledI(c: Int, g: Word[Std] => QState[Word[Std]])(s: Word[Std]): QState[Word[Std]] = {
     s match {
       case Word(Nil) => pure(Word(Nil))

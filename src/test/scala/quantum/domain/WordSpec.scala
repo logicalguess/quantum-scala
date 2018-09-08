@@ -362,4 +362,29 @@ class WordSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
       println(ListMap(mapped.toSeq.sortBy(_._1): _*))
     }
   }
+
+  "controlled0" should "inv" in {
+    val n = 4
+    var state = pure(Word.fromInt(0, n))
+
+    for (i <- 0 until n) state = state >>= wire(i, X) >>= wire(i, H)
+    println(state)
+
+    state = state >>= controlledL0((0 until n - 1).toList.toSet, n - 1, X)
+
+    println(state)
+  }
+
+  "controlled1" should "inv" in {
+    val n = 4
+    var state = pure(Word.fromInt(0, n))
+
+    for (i <- 0 until n) state = state >>= wire(i, H)
+    println(state)
+
+    for (i <- 0 until n) state = state >>= wire(i, X)
+    state = state >>= controlledL((0 until n - 1).toList.toSet, n - 1, Z)
+    for (i <- 0 until n) state = state >>= wire(i, X)
+    println(state)
+  }
 }

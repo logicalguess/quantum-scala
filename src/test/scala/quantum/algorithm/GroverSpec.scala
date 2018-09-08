@@ -206,7 +206,7 @@ class GroverSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
     state.hist
   }
 
-  "controlled g" should "work" in {
+  "controlled g" should "search" in {
     def f(x: Int) = x == 5
 
     val n_controls = 2
@@ -227,8 +227,40 @@ class GroverSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
 
     for (i <- 0 until n_controls) {
       state = state >>= controlledI(0, g)
-      state.hist
+      //state.hist
+    }
+    state.hist
+  }
+
+
+  "controlled g" should "count" in {
+    def f(x: Int) = x <= 5
+
+    val n_controls = 3
+    val controls = (0 until n_controls).toList
+
+    val n_targets = 3
+    val targets = (0 until n_targets).toList
+
+    def gf(shift: Int) =
+      oracleL(f)(targets.map { i => i + shift }, 3 + shift) _ >=> invL((targets).map { i => i + shift })
+
+    lazy val g = gf(n_controls)
+
+    var state = pure(Word[Std](List.fill(n_controls + n_targets)(S0) ++ List(S1)))
+
+    for (j <- (0 to n_controls + n_targets)) {
+      state = state >>= wire(j, H)
     }
 
+    for (i <- 0 until n_controls) {
+      for (i <- 0 until math.pow(2, n_controls - i).toInt) {
+        state = state >>= controlledI(0, g)
+      }
+    }
+
+    state = state >>= QFT.iqftL(controls)
+
+    state.hist
   }
 }
