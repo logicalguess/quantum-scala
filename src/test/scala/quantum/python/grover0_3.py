@@ -1,45 +1,43 @@
+import numpy as np
+
 # importing QISKit
 from qiskit import QuantumCircuit, ClassicalRegister, QuantumRegister
 from qiskit.tools import visualization
 import util
 
-
+# https://cstheory.stackexchange.com/questions/38538/oracle-construction-for-grovers-algorithm
+# look at states ending in 1
 def build_circuit():
     q = QuantumRegister(3)
     c = ClassicalRegister(3)
 
     qc = QuantumCircuit(q, c)
 
-    # set last bit to 1
-    qc.x(q[2])
+    qc.x(q[0])
+    qc.x(q[1])
 
-    # superposition
     qc.h(q[0])
     qc.h(q[1])
-    qc.h(q[2])
 
 
-    # oracle
+    # oracle compute
+    qc.ccx(q[0], q[1], q[2])
+
+    qc.z(q[2])
+
+    # oracle uncompute
     qc.ccx(q[0], q[1], q[2])
 
     # diffusion
-    diffusion(q, qc)
+    util.cx0(qc, q[0], q[1])
+
+
+    # oracle compute
+    qc.ccx(q[0], q[1], q[2])
+
+    qc.z(q[2])
 
     return qc, q, c
-
-
-def diffusion(q, qc):
-    qc.h(q[0])
-    qc.h(q[1])
-    qc.x(q[0])
-    qc.x(q[1])
-
-    qc.cz(q[0], q[1])
-
-    qc.x(q[0])
-    qc.x(q[1])
-    qc.h(q[0])
-    qc.h(q[1])
 
 
 if __name__ == "__main__":
