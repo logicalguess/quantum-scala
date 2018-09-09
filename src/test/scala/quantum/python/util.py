@@ -5,6 +5,14 @@ from qiskit import compile, execute, register, available_backends, get_backend
 import Qconfig
 
 
+def ccx0(qc, c1, c2, t):
+    qc.x(c1)
+    qc.x(c2)
+    qc.ccx(c1, c2, t)
+    qc.x(c1)
+    qc.x(c2)
+
+
 def run(shots, qc, cfg, backend = None):
     if 'url' in cfg.keys():
         register(cfg['token'], cfg['url'], cfg['hub'], cfg['group'], cfg['project'])

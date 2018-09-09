@@ -365,7 +365,7 @@ class WordSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
   }
 
   "controlled0" should "inv" in {
-    val n = 4
+    val n = 3
     var state = pure(Word.fromInt(0, n))
 
     for (i <- 0 until n) state = state >>= wire(i, X) >>= wire(i, H)

@@ -10,41 +10,14 @@ def build_circuit():
 
     qc = QuantumCircuit(q, c)
 
-    # set last bit to 1
-    qc.x(q[2])
-
     # superposition
     qc.h(q[0])
     qc.h(q[1])
-    qc.h(q[2])
 
-
-    # oracle
-    qc.ccx(q[0], q[1], q[2])
-    #qc.z(q[2])
-    #qc.ccx(q[0], q[1], q[2])
-
-    # diffusion
-    diffusion(q, qc)
-
-    #qc.ccx(q[0], q[1], q[2])
-    #qc.z(q[2])
+    # ccx0
+    util.ccx0(qc, q[0], q[1], q[2])
 
     return qc, q, c
-
-
-def diffusion(q, qc):
-    qc.h(q[0])
-    qc.h(q[1])
-    qc.x(q[0])
-    qc.x(q[1])
-
-    qc.cz(q[0], q[1])
-
-    qc.x(q[0])
-    qc.x(q[1])
-    qc.h(q[0])
-    qc.h(q[1])
 
 
 if __name__ == "__main__":
