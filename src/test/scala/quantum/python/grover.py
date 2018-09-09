@@ -6,24 +6,36 @@ from qiskit.tools import visualization
 import Qconfig
 
 
-def cry(theta, qc, q_control, q_target):
-    qc.ry(theta/2, q_target)
-    qc.cx(q_control, q_target)
-    qc.ry(-theta/2, q_target)
-    qc.cx(q_control, q_target)
-
-
 def build_circuit(n):
-    q = QuantumRegister(n)
-    c = ClassicalRegister(n)
+    q = QuantumRegister(3)
+    c = ClassicalRegister(3)
 
     qc = QuantumCircuit(q, c)
 
-    for i in range(0, n):
-        qc.h(q[i])
+    # set last bit to 1
+    qc.x(q[2])
 
-    for i in range(0,  n - 1):
-        cry(-np.pi/2, qc, q[i], q[i + 1])
+    # superposition
+    qc.h(q[0])
+    qc.h(q[1])
+    qc.h(q[2])
+
+
+    # oracle
+    qc.ccx(q[0], q[1], q[2])
+
+    # diffusion
+    qc.h(q[0])
+    qc.h(q[1])
+    qc.x(q[0])
+    qc.x(q[1])
+
+    qc.cz(q[0], q[1])
+
+    qc.x(q[0])
+    qc.x(q[1])
+    qc.h(q[0])
+    qc.h(q[1])
 
     return qc, q, c
 
@@ -79,17 +91,6 @@ def get_probs(n, cfg):
 
 
 if __name__ == "__main__":
-    for i in range(1, 10):
-        hist = get_counts(i, 'sim')
-        print("F(", i, ") = ", len(hist))
-        #visualization.plot_histogram(hist)
-
-# F( 1 ) =  2
-    # F( 2 ) =  3
-    # F( 3 ) =  5
-    # F( 4 ) =  8
-    # F( 5 ) =  13
-    # F( 6 ) =  21
-    # F( 7 ) =  34
-    # F( 8 ) =  55
-    # F( 9 ) =  89
+    hist = get_probs(2, 'sim')
+    print("F(", 2, ") = ", len(hist))
+    visualization.plot_histogram(hist)

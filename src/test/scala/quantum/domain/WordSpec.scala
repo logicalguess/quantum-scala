@@ -420,7 +420,7 @@ class WordSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
     for (i <- 0 until n) state = state >>= wire(i, H)
 
     // oracle
-    state = state >>= o
+    state = state >>= o //controlledL(Set(n - 3, n - 2), n - 1, X)
 
     // diffusion
     for (i <- 0 until n - 1) state = state >>= wire(i, H) >>= wire(i, X)
