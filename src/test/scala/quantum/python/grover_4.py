@@ -1,5 +1,5 @@
 # importing QISKit
-from qiskit import QuantumCircuit, ClassicalRegister, QuantumRegister
+from qiskit import QuantumCircuit, QuantumRegister
 from qiskit.tools import visualization
 import util
 

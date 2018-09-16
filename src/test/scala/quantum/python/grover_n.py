@@ -1,14 +1,14 @@
 # importing QISKit
-from qiskit import QuantumCircuit, ClassicalRegister, QuantumRegister
+from qiskit import QuantumCircuit, QuantumRegister
 from qiskit.tools import visualization
 import math
 import util
 
 
 def build_circuit(n, m):
-    q = QuantumRegister(n)
+    q = QuantumRegister(n, "ctrl")
     a = QuantumRegister(n - 1, "anc")
-    t = QuantumRegister(1)
+    t = QuantumRegister(1, "tgt")
 
     qc = QuantumCircuit(q, a, t)
 
