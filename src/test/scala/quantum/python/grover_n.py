@@ -40,7 +40,7 @@ def oracle(n, m, qc, q, a, t):
         if is_bit_not_set(m, i):
             qc.x(q[n - 1 - i])
 
-    controlled(qc, q, a, t)
+    util.controlled_X(qc, q, a, t)
 
     for i in range(0, n):
         if is_bit_not_set(m, i):
@@ -53,28 +53,11 @@ def diffusion(qc, q, a):
         qc.x(q[i])
 
     # controlled Z
-    controlled(qc, [q[i] for i in range(0, len(q) - 1)], a, [q[len(q) - 1]], c_gate = lambda qc, ctrl, tgt: qc.cz(ctrl, tgt))
+    util.controlled_Z(qc, [q[i] for i in range(0, len(q) - 1)], a, [q[len(q) - 1]])
 
     for i in range(0, len(q)):
         qc.x(q[i])
         qc.h(q[i])
-
-
-def controlled(qc, ctrl, anc, tgt, c_gate = lambda qc, c, t: qc.cx(c, t), cc_gate = lambda qc, c1, c2, t: qc.ccx(c1, c2, t)):
-    n = len(ctrl)
-
-    # compute
-    cc_gate(qc, ctrl[0], ctrl[1], anc[0])
-    for i in range(2, n):
-        cc_gate(qc, ctrl[i], anc[i-2], anc[i-1])
-
-    # copy
-    c_gate(qc, anc[n-2], tgt[0])
-
-    # uncompute
-    for i in range(n-1, 1, -1):
-        cc_gate(qc, ctrl[i], anc[i-2], anc[i-1])
-    cc_gate(qc, ctrl[0], ctrl[1], anc[0])
 
 
 if __name__ == "__main__":

@@ -4,6 +4,27 @@ import numpy as np
 from qiskit import compile, execute, register, available_backends, get_backend
 import Qconfig
 
+def controlled_X(qc, ctrl, anc, tgt):
+    return controlled(qc, ctrl, anc, tgt)
+
+def controlled_Z(qc, ctrl, anc, tgt):
+    return controlled(qc, ctrl, anc, tgt, c_gate = lambda qc, ctrl, tgt: qc.cz(ctrl, tgt))
+
+def controlled(qc, ctrl, anc, tgt, c_gate = lambda qc, c, t: qc.cx(c, t), cc_gate = lambda qc, c1, c2, t: qc.ccx(c1, c2, t)):
+    n = len(ctrl)
+
+    # compute
+    cc_gate(qc, ctrl[0], ctrl[1], anc[0])
+    for i in range(2, n):
+        cc_gate(qc, ctrl[i], anc[i-2], anc[i-1])
+
+    # copy
+    c_gate(qc, anc[n-2], tgt[0])
+
+    # uncompute
+    for i in range(n-1, 1, -1):
+        cc_gate(qc, ctrl[i], anc[i-2], anc[i-1])
+    cc_gate(qc, ctrl[0], ctrl[1], anc[0])
 
 def cx0(qc, c, t):
     qc.x(c)
