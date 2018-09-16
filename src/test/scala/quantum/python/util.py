@@ -52,6 +52,8 @@ def histogram(state):
     n = len(state)
     pow = int(np.log2(n))
     keys = [bin(i)[2::].rjust(pow, '0')[::-1] for i in range(0, n)]
+    #keys = [bin(i)[2::].rjust(pow, '0') for i in range(0, n)]
+
     print(dict(zip(keys, state)))
 
     probs = [np.round(abs(a)*abs(a), 5) for a in state]

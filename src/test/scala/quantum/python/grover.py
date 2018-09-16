@@ -20,13 +20,21 @@ def build_circuit():
 
 
     # oracle
-    qc.ccx(q[0], q[1], q[2])
+    oracle_01(q, qc)
 
     # diffusion
     diffusion(q, qc)
 
     return qc, q, c
 
+
+def oracle_01(q, qc):
+    qc.x(q[0])
+    qc.ccx(q[0], q[1], q[2])
+    qc.x(q[0])
+
+def oracle_11(q, qc):
+    qc.ccx(q[0], q[1], q[2])
 
 def diffusion(q, qc):
     qc.h(q[0])

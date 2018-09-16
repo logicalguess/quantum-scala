@@ -16,7 +16,7 @@ class AmplitudeSpec extends FlatSpec {
     //def f(x: Int) = x <= 1
     def f(n: Int): Boolean = (n & (n >>> 1)) == 0
 
-    val n_controls = 3
+    val n_controls = 4
     val controls = (0 until n_controls).toList
 
     val n_targets = 3
@@ -46,7 +46,7 @@ class AmplitudeSpec extends FlatSpec {
     }
     //state.hist
 
-    state = state >>= QFT.iqftL(controls)
+    state = state >>= QFT.iqftLR(controls)
     println(state)
     state.hist
 
@@ -95,19 +95,19 @@ class AmplitudeSpec extends FlatSpec {
     println(estimates)
   }
 
-  "count" should "all states" in {
+  "count" should "states" in {
 
     val op: Gate[Std, Std] = I
 
     //def f(x: Int) = true
-    //def f(x: Int) = x == 3
-    //def f(x: Int) = x <= 1
-    def f(n: Int): Boolean = (n & (n >>> 1)) == 0
+    def f(x: Int) = x == 3
+    //def f(x: Int) = x >= 4
+    //def f(n: Int): Boolean = (n & (n >>> 1)) != 0
 
-    val n_controls = 3
+    val n_controls = 6
     val controls = (0 until n_controls).toList
 
-    val n_targets = 3
+    val n_targets = 4
     val targets = (0 until n_targets).toList
 
     def gf(shift: Int) =
@@ -145,7 +145,8 @@ class AmplitudeSpec extends FlatSpec {
     val ints = top.map { case (w, a) => (Word.toInt(Word(w.letters.take(n_controls))), a.norm2) }
     println(ints)
 
-    println(ints.map { case (i, p) => (math.pow(2, n_targets)*math.pow(math.sin(math.Pi * i/math.pow(2, n_controls)), 2), p)})
+    val factor = math.pow(2, n_targets) //2*n_targets //2*n_controls
+    println(ints.map { case (i, p) => (factor*math.pow(math.sin(math.Pi * i/math.pow(2, n_controls)), 2), p)})
 
   }
 
