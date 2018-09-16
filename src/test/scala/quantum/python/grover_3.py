@@ -52,6 +52,9 @@ def diffusion(qc, q, a):
         qc.x(q[i])
 
     controlled(qc, [q[0], q[1]], a, q[2], cc_gate = lambda qc, ctrl1, ctrl2, tgt: qc.ccx(ctrl1, ctrl2, tgt), c_gate = lambda qc, ctrl, tgt: qc.cz(ctrl, tgt))
+    # qc.h(q[2])
+    # qc.ccx(q[0], q[1], q[2])
+    # qc.h(q[2])
 
     for i in range(0, 3):
         qc.x(q[i])
