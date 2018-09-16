@@ -53,14 +53,14 @@ def diffusion(qc, q, a):
         qc.x(q[i])
 
     # controlled Z
-    controlled(qc, [q[i] for i in range(0, len(q) - 1)], a, q[len(q) - 1], cc_gate = lambda qc, ctrl1, ctrl2, tgt: qc.ccx(ctrl1, ctrl2, tgt), c_gate = lambda qc, ctrl, tgt: qc.cz(ctrl, tgt))
+    controlled(qc, [q[i] for i in range(0, len(q) - 1)], a, [q[len(q) - 1]], cc_gate = lambda qc, ctrl1, ctrl2, tgt: qc.ccx(ctrl1, ctrl2, tgt), c_gate = lambda qc, ctrl, tgt: qc.cz(ctrl, tgt))
 
     for i in range(0, len(q)):
         qc.x(q[i])
         qc.h(q[i])
 
 
-def controlled(qc, ctrl, anc, tgt, cc_gate = lambda qc, ctrl1, ctrl2, tgt: qc.ccx(ctrl1, ctrl2, tgt), c_gate = lambda qc, ctrl, tgt: qc.cx(ctrl, tgt)):
+def controlled(qc, ctrl, anc, tgt, cc_gate = lambda qc, c1, c2, t: qc.ccx(c1, c2, t), c_gate = lambda qc, c, t: qc.cx(c, t)):
     n = len(ctrl)
 
     # compute
@@ -78,6 +78,6 @@ def controlled(qc, ctrl, anc, tgt, cc_gate = lambda qc, ctrl1, ctrl2, tgt: qc.cc
 
 
 if __name__ == "__main__":
-    hist = util.get_probs(build_circuit(3, 5), 'sim')
+    hist = util.get_probs(build_circuit(5, 31), 'sim')
     print(hist)
     visualization.plot_histogram(hist)
