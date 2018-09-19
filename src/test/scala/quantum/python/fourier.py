@@ -1,5 +1,5 @@
 # importing QISKit
-from qiskit import QuantumCircuit, ClassicalRegister, QuantumRegister
+from qiskit import QuantumCircuit, QuantumRegister
 from qiskit.tools import visualization
 
 import numpy as np
@@ -28,25 +28,33 @@ def build_circuit():
 
     qc = QuantumCircuit(q)
 
-    qc.x(q[2])
-
-    # import math
-    # state = [
-    # 1 / math.sqrt(16) * complex(0, 1),
-    # 1 / math.sqrt(8) * complex(1, 0),
-    # 1 / math.sqrt(16) * complex(1, 1),
-    # 0,
-    # 0,
-    # 1 / math.sqrt(8) * complex(1, 2),
-    # 1 / math.sqrt(16) * complex(1, 0),
-    # 0]
-    #
-    # qc.initialize(state, q)
+    #init1(q, qc)
+    init2(q, qc)
 
     qft(qc, q)
     iqft(qc, q)
 
     return qc, None, None
+
+
+def init2(q, qc):
+    import math
+    a = math.sqrt(0.125)
+    state = [
+        a * complex(1, 0),
+        a * complex(0, 1),
+        a * complex(1, 0),
+        a * complex(1, 0),
+        a * complex(0, 1),
+        a * complex(1, 0),
+        a * complex(0, 1),
+        a * complex(1, 0),
+    ]
+    qc.initialize(state, q)
+
+
+def init1(q, qc):
+    qc.x(q[2])
 
 
 if __name__ == "__main__":
