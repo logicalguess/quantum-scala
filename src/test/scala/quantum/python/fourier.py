@@ -46,7 +46,7 @@ def init2(q, qc):
         a * complex(0, 1),
         a * complex(1, 0),
         a * complex(0, 1),
-        a * complex(1, 0),
+        a * complex(1, 0)
     ]
     qc.initialize(state, q)
 
