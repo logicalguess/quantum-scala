@@ -15,9 +15,9 @@ def qft(qc, q):
 
 
 def iqft(qc, q):
-    for j in range(len(q))[::-1]:
+    for j in reversed(range(len(q))):
         qc.h(q[j])
-        for k in range(j)[::-1]:
+        for k in reversed(range(j)):
             qc.crz(-np.pi/float(2**(j-k)), q[j], q[k])
 
 
