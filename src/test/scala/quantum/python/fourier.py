@@ -11,16 +11,14 @@ def qft(qc, q):
     for j in range(len(q)):
         qc.h(q[j])
         for k in range(j + 1, len(q)):
-            theta_jk = np.pi/float(2**(k - j))
-            qc.cu1(theta_jk, q[k], q[j])
+            qc.crz(np.pi/float(2**(k - j)), q[k], q[j])
 
 
 def iqft(qc, q):
     for j in range(len(q))[::-1]:
         qc.h(q[j])
         for k in range(j)[::-1]:
-            theta_jk = -np.pi/float(2**(j-k))
-            qc.cu1(theta_jk, q[j], q[k])
+            qc.crz(-np.pi/float(2**(j-k)), q[j], q[k])
 
 
 def build_circuit():
@@ -28,8 +26,8 @@ def build_circuit():
 
     qc = QuantumCircuit(q)
 
-    #init1(q, qc)
-    init2(q, qc)
+    init1(q, qc)
+    #init2(q, qc)
 
     qft(qc, q)
     iqft(qc, q)
@@ -58,6 +56,13 @@ def init1(q, qc):
 
 
 if __name__ == "__main__":
-    hist = util.get_probs(build_circuit(), 'sim')
+    qc, _, _ = build_circuit()
+
+    # from qiskit.tools.visualization import plot_circuit
+    # plot_circuit(qc)
+
+    hist = util.get_probs((qc, None, None), 'sim')
     print(hist)
     visualization.plot_histogram(hist)
+
+
