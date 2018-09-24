@@ -1,15 +1,18 @@
 package quantum.computing
 
+trait Monoid[V] {
+  val empty: V
+  val combine: (V, V) => V
+}
+
 trait UState[+This <: UState[This, B, V], B, V] {
   val bins: List[(B, V)]
-  val neutral: V
-  val op: (V, V) => V
-  //val m = implicitly[Monoid[V]]
+  val m: Monoid[V]
 
   val normalizeRule: List[(B, V)] => List[(B, V)] = identity
   val combineRule: List[(B, V)] => List[(B, V)] = { bs =>
     bs.groupBy(_._1).toList.map {
-      case (b, vs) => (b, vs.map(_._2).foldLeft(neutral)(op))
+      case (b, vs) => (b, vs.map(_._2).foldLeft(m.empty)(m.combine))
     }
   }
   val updateRule: ((B, V), B => List[(B, V)]) => List[(B, V)]
@@ -26,9 +29,10 @@ trait UState[+This <: UState[This, B, V], B, V] {
 }
 
 case class ZState[B](bins: List[(B, Double)]) extends UState[ZState[B], B, Double] {
-  override val neutral: Double = 0.0
-  override val op: (Double, Double) => Double = _ + _
-
+  val m = new Monoid[Double] {
+    override val empty: Double = 0.0
+    override val combine: (Double, Double) => Double = _ + _
+  }
   override val updateRule: ((B, Double), B => List[(B, Double)]) => List[(B, Double)] = {
     case ((b, v), f) => List((b -> v)) ++ f(b)
   }
@@ -37,8 +41,10 @@ case class ZState[B](bins: List[(B, Double)]) extends UState[ZState[B], B, Doubl
 }
 
 case class OState[B](bins: List[(B, Double)]) extends UState[OState[B], B, Double] {
-  override val neutral: Double = 0.0
-  override val op: (Double, Double) => Double = _ + _
+  val m = new Monoid[Double] {
+    override val empty: Double = 0.0
+    override val combine: (Double, Double) => Double = _ + _
+  }
 
   override val updateRule: ((B, Double), B => List[(B, Double)]) => List[(B, Double)] = {
     case ((b, v), f) => List((b -> v)) ++ f(b)
@@ -48,8 +54,10 @@ case class OState[B](bins: List[(B, Double)]) extends UState[OState[B], B, Doubl
 }
 
 case class PState[B](bins: List[(B, Double)]) extends UState[PState[B], B, Double] {
-  override val neutral: Double = 1.0
-  override val op: (Double, Double) => Double = _ * _
+  val m = new Monoid[Double] {
+    override val empty: Double = 1.0
+    override val combine: (Double, Double) => Double = _ * _
+  }
 
   override val updateRule: ((B, Double), B => List[(B, Double)]) => List[(B, Double)] = {
     case ((b, v), f) => f(b).map { case (c, u) => (c, u * v) }
@@ -70,8 +78,10 @@ case class PState[B](bins: List[(B, Double)]) extends UState[PState[B], B, Doubl
 import quantum.domain.Complex
 
 case class QState[B](bins: List[(B, Complex)]) extends UState[QState[B], B, Complex] {
-  override val neutral: Complex = Complex.zero
-  override val op: (Complex, Complex) => Complex = Complex.plus
+  val m = new Monoid[Complex] {
+    override val empty: Complex = Complex.zero
+    override val combine: (Complex, Complex) => Complex = Complex.plus
+  }
 
   override val updateRule: ((B, Complex), B => List[(B, Complex)]) => List[(B, Complex)] = {
     case ((b, v), f) => f(b).map { case (c, u) => (c, u * v) }
