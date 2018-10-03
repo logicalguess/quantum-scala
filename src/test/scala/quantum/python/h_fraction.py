@@ -30,7 +30,7 @@ def init(q, qc, x):
 
 
 if __name__ == "__main__":
-    x = 1
+    x = 1 #0, 1/2, 1/4, 3/4
     qc, _, _ = build_circuit(x)
 
     # from qiskit.tools.visualization import plot_circuit

@@ -6,6 +6,8 @@ import math
 
 import util
 
+# rotation by z equivalent to phase kickback
+# changes the amplitude of 1, but not the probability
 
 def build_circuit(state, theta):
     q = QuantumRegister(1)
@@ -21,11 +23,11 @@ def build_circuit(state, theta):
 if __name__ == "__main__":
     a = math.sqrt(0.5)
     state = [
-        a * complex(1, 0),
-        a * complex(0, 1)
+        a,
+        a
     ]
 
-    theta = math.pi/4
+    theta = math.pi/16
     print(math.sqrt(0.5)*complex(math.cos(theta), math.sin(theta)))
 
     qc, _, _ = build_circuit(state, theta)
