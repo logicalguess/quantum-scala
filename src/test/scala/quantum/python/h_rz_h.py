@@ -12,8 +12,8 @@ def build_circuit(x):
 
     qc = QuantumCircuit(q)
 
-    init(q, qc, x)
-
+    qc.h(q[0])
+    qc.rz(np.pi*x, q[0])
     qc.h(q[0])
 
     return qc, None, None
@@ -44,4 +44,5 @@ if __name__ == "__main__":
     print("probability of 1 = ", math.pow(np.sin(np.pi*(x/2)), 2))
 
     print("x = ", math.asin(math.sqrt(hist.get('1', 0)))*2/np.pi)
+
 
