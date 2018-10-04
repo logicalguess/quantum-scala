@@ -7,13 +7,14 @@ import math
 
 import util
 
-
 def build_circuit(x):
     q = QuantumRegister(1)
 
     qc = QuantumCircuit(q)
 
     init(q, qc, x)
+
+    qc.h(q[0])
 
     return qc, None, None
 
@@ -29,8 +30,18 @@ def init(q, qc, x):
 
 
 if __name__ == "__main__":
-    qc, _, _ = build_circuit(0)
-    hist = util.get_probs((qc, None, None), 'sim')
+    x = 3/4 #0, 1/2, 1/4, 3/4
+    qc, _, _ = build_circuit(x)
 
-    qc, _, _ = build_circuit(1)
+    # from qiskit.tools.visualization import plot_circuit
+    # plot_circuit(qc)
+
     hist = util.get_probs((qc, None, None), 'sim')
+    print(hist)
+    visualization.plot_histogram(hist)
+
+    print("probability of 0 = ", math.pow(np.cos(np.pi*(x/2)), 2))
+    print("probability of 1 = ", math.pow(np.sin(np.pi*(x/2)), 2))
+
+    print("x = ", math.asin(math.sqrt(hist.get('1', 0)))*2/np.pi)
+
