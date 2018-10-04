@@ -37,7 +37,7 @@ if __name__ == "__main__":
     # plot_circuit(qc)
 
     hist = util.get_probs((qc, None, None), 'sim')
-    print(hist)
+    print("Probabilities:", hist)
     visualization.plot_histogram(hist)
 
     print("probability of 0 = ", math.pow(np.cos(np.pi*(x/2)), 2))
