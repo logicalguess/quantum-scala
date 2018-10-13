@@ -9,6 +9,7 @@ import util
 
 # e^(i*theta)*cos(theta)|0> + sin(theta)|1>
 
+
 def build_circuit(theta):
     q = QuantumRegister(1)
 
