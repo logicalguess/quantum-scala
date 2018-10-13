@@ -22,14 +22,11 @@ def build_circuit(theta, phi):
     qc.rz(2*theta, q[0])
     qc.h(q[0])
 
-    qc.rz(np.pi/2 - theta, q[0])
+    qc.rz(np.pi/2 - theta + phi, q[0])
 
     qc.x(q[0])
     qc.rz(-theta, q[0])
     qc.x(q[0])
-
-    qc.rz(phi, q[0])
-
 
     return qc, None, None
 
