@@ -18,6 +18,7 @@ def build_circuit(theta):
     qc.h(q[0])
     qc.rz(2*theta, q[0])
     qc.h(q[0])
+
     qc.rz(np.pi/2 - theta, q[0])
 
     qc.x(q[0])
