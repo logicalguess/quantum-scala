@@ -10,7 +10,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import util
 
-# e^(i*theta)*cos(theta)|0> + e^(-i*theta)*sin(theta)|1>
+# e^(i*theta)*cos(theta)|0> + e^(i*(theta - pi/2))*sin(theta)|1>
 
 
 def build_circuit(theta):

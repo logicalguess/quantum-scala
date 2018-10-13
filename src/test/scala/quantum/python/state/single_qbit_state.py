@@ -18,7 +18,7 @@ def build_circuit(theta, phi):
 
     qc = QuantumCircuit(q)
 
-    # prepare state: e^(i*theta)*cos(theta)|0> + e^(-i*theta)*sin(theta)|1>
+    # prepare state: e^(i*theta)*cos(theta)|0> + e^(i*(theta - pi/2))*sin(theta)|1>
     qc.h(q[0])
     qc.rz(2*theta, q[0])
     qc.h(q[0])
