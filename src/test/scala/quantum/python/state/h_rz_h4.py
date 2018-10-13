@@ -35,6 +35,9 @@ def build_circuit(theta, phi):
 
 
 if __name__ == "__main__":
+    # bias = 0.7
+    # theta = bias * np.pi/2
+
     theta = 0.258
     phi = 0.321
 
@@ -52,6 +55,8 @@ if __name__ == "__main__":
 
     print("|th| from prob of 1 = ", np.round(math.asin(math.sqrt(hist.get('1', 0))), 5))
     print("|th| from prob of 0 = ", np.round(math.acos(math.sqrt(hist.get('0', 0))), 5))
+
+    # print("bias of getting 1 = ", np.round(math.asin(math.sqrt(hist.get('1', 0)))*2/np.pi, 5))
 
     print("cos(phi)*cos(theta) = ", np.round(np.cos(phi) * np.sin(theta), 5))
     print("sin(phi)*cos(theta) = ", np.round(np.sin(phi) * np.sin(theta), 5))
