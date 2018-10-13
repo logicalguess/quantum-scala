@@ -4,6 +4,9 @@ from qiskit.tools import visualization
 
 import math
 
+import os, sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 import util
 
 # rotation by z equivalent to phase kickback

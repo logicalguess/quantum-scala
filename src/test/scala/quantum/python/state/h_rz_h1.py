@@ -5,9 +5,12 @@ from qiskit.tools import visualization
 import numpy as np
 import math
 
+import os, sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 import util
 
-# cos(theta)|0> + e^(i*theta)*sin(theta)|1>
+# e^(i*theta)*cos(theta)|0> + sin(theta)|1>
 
 
 def build_circuit(theta):
@@ -19,10 +22,7 @@ def build_circuit(theta):
     qc.rz(2*theta, q[0])
     qc.h(q[0])
 
-    qc.x(q[0])
-    qc.rz(-theta, q[0])
-    qc.x(q[0])
-    qc.rz(np.pi/2, q[0])
+    qc.rz(np.pi/2 - theta, q[0])
 
     return qc, None, None
 
