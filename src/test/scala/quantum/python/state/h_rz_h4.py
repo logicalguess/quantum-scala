@@ -35,7 +35,7 @@ def build_circuit(theta, phi):
 
 
 if __name__ == "__main__":
-    theta = 0.257
+    theta = 0.258
     phi = 0.321
 
     qc, _, _ = build_circuit(theta, phi)
