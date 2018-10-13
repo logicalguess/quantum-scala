@@ -28,8 +28,8 @@ if __name__ == "__main__":
 
     qc, _, _ = build_circuit(2*math.pi*phi)
 
-    from qiskit.tools.visualization import plot_circuit
-    plot_circuit(qc)
+    # from qiskit.tools.visualization import plot_circuit
+    # plot_circuit(qc)
 
     hist = util.get_probs((qc, None, None), 'sim')
     print("Probabilities:", hist)
