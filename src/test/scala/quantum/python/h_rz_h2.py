@@ -40,7 +40,7 @@ if __name__ == "__main__":
     print("probability of 0 = cos^2(pi*phi/2)", np.round(math.pow(np.cos(np.pi*phi/2), 2), 5))
     print("probability of 1 = sin^2(pi*phi/2)", np.round(math.pow(np.sin(np.pi*phi/2), 2), 5))
 
-    print("x = ", np.round(math.asin(math.sqrt(hist.get('1', 0)))*2/np.pi, 5))
+    print("phi = ", np.round(math.asin(math.sqrt(hist.get('1', 0)))*2/np.pi, 5))
 
     print("sin(pi*phi/2)*cos(pi*phi/2) = ", np.round(np.sin(np.pi*phi/2)*np.cos(np.pi*phi/2), 5))
     print("cos(pi*phi/2) = ", np.round(np.cos(np.pi*phi/2), 5))
