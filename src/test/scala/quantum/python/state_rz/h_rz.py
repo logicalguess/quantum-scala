@@ -11,7 +11,7 @@ import util
 
 # rotation by z equivalent to phase kickback
 # changes the amplitude of 1, but not the probability
-# (|0> + e^(i*theta)*sin(theta)|1>)/sqrt(2)
+# (|0> + e^(i*theta)|1>)/sqrt(2)
 
 
 def build_circuit(theta):
@@ -26,17 +26,17 @@ def build_circuit(theta):
 
 if __name__ == "__main__":
 
-    phi = 1/10
+    theta = 0.258
 
-    qc, _, _ = build_circuit(math.pi*phi)
+    qc, _, _ = build_circuit(theta)
 
     # from qiskit.tools.visualization import plot_circuit
     # plot_circuit(qc)
 
     hist = util.get_probs((qc, None, None), 'sim')
     print("Probabilities:", hist)
-    print("e^(i*pi*phi)/sqrt(2) = ",
-        math.sqrt(0.5)*complex(math.cos(math.pi*phi), math.sin(math.pi*phi)))
+    print("e^(i*theta)/sqrt(2) = ",
+        math.sqrt(0.5)*complex(math.cos(theta), math.sin(theta)))
 
     visualization.plot_histogram(hist)
 
