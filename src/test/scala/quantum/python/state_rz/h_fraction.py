@@ -24,6 +24,8 @@ def build_circuit(x):
 def init(q, qc, x):
     a = 1/math.sqrt(2)
 
+    # prepare state: (|0> + e^(i*np.pi*x)|1>)/sqrt(2)
+
     state = [
         a,
         a*complex(np.cos(np.pi*x), np.sin(np.pi*x))

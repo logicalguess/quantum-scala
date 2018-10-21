@@ -10,7 +10,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import util
 
-# prepare state: cos(theta)*|0> + sin(theta)*|1>
+# prepare state: cos(theta)|0> + sin(theta)|1>
 
 def build_circuit(theta):
     q = QuantumRegister(1)
