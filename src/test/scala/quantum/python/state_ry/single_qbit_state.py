@@ -51,8 +51,8 @@ if __name__ == "__main__":
 
     # print("bias of getting 1 = ", np.round(math.asin(math.sqrt(hist.get('1', 0)))*2/np.pi, 5))
 
-    print("cos(phi)*cos(theta) = ", np.round(np.cos(phi) * np.sin(theta), 5))
-    print("sin(phi)*cos(theta) = ", np.round(np.sin(phi) * np.sin(theta), 5))
+    print("cos(phi)*sin(theta) = ", np.round(np.cos(phi) * np.sin(theta), 5))
+    print("sin(phi)*sin(theta) = ", np.round(np.sin(phi) * np.sin(theta), 5))
 
     print("cos(theta) = ", np.round(np.cos(theta), 5))
     print("sin(theta) = ", np.round(np.sin(theta), 5))

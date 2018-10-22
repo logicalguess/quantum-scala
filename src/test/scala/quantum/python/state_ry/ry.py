@@ -37,7 +37,6 @@ if __name__ == "__main__":
     print("Probabilities:", hist)
     visualization.plot_histogram(hist)
 
-
     print("probability of 0 = cos^2(theta)", np.round(math.pow(np.cos(theta), 2), 5))
     print("probability of 1 = sin^2(theta)", np.round(math.pow(np.sin(theta), 2), 5))
 
