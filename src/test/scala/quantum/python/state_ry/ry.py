@@ -12,6 +12,7 @@ import util
 
 # prepare state: cos(theta)|0> + sin(theta)|1>
 
+
 def build_circuit(theta):
     q = QuantumRegister(1)
     qc = QuantumCircuit(q)
