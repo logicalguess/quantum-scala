@@ -28,6 +28,10 @@ import util
 # '1110': sqrt(1/8)*cos(7*theta)
 # '1111': sqrt(1/8)*sin(7*theta)
 
+# k = first 3 bits reversed
+# |k>|0>: sqrt(1/8)*cos(k*theta)
+# |k>|1>: sqrt(1/8)*sin(k*theta)
+
 def cry(theta, qc, q_control, q_target):
     qc.ry(theta/2, q_target)
     qc.cx(q_control, q_target)
