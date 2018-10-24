@@ -1,9 +1,7 @@
 # importing QISKit
 from qiskit import QuantumCircuit, QuantumRegister
-from qiskit.tools import visualization
 
 import numpy as np
-import math
 
 import os, sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
