@@ -40,7 +40,7 @@ def cry(theta, qc, q_control, q_target):
 
 
 def build_circuit(n_qbits, phi, theta):
-    q = QuantumRegister(3)
+    q = QuantumRegister(n_qbits)
     t = QuantumRegister(1)
     qc = QuantumCircuit(q, t)
 
