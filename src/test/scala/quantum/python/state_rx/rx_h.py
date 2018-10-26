@@ -10,14 +10,14 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import util
 
-# prepare state: e^(i*theta) * sqrt(1/2)* |0> + e^(-i*theta) * sqrt(1/2)* |1>
+# prepare state: e^(-i*theta) * sqrt(1/2)* |0> + e^(i*theta) * sqrt(1/2)* |1>
 
 
 def build_circuit(theta):
     q = QuantumRegister(1)
     qc = QuantumCircuit(q)
 
-    qc.rx(-2*theta, q[0])
+    qc.rx(2*theta, q[0])
     qc.h(q[0])
 
     return qc, None, None
