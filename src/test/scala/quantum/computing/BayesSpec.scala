@@ -42,10 +42,10 @@ class BayesSpec extends FlatSpec {
     //ls.foldLeft(z) { case (buffer, (b, v)) => buffer ++ List((b -> List((b -> v)))) }.toMap
   }
 
-    implicit def likelihoodMapToChange[K](ls: List[(K, Double)]): Map[K, List[(K, Double)]] = {
-      val z: List[(K, List[(K, Double)])] = Nil
-      ls.foldLeft(z) { case (buffer, (b, v)) => buffer ++ List((b -> List((b -> v)))) }.toMap
-    }
+  implicit def likelihoodMapToChange[K](ls: List[(K, Double)]): Map[K, List[(K, Double)]] = {
+    val z: List[(K, List[(K, Double)])] = Nil
+    ls.foldLeft(z) { case (buffer, (b, v)) => buffer ++ List((b -> List((b -> v)))) }.toMap
+  }
 
   "2" should "" in {
 
