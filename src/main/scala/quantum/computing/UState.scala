@@ -54,6 +54,20 @@ case class OState[B](bins: List[(B, Double)]) extends UState[OState[B], B, Doubl
   override def create(bins: List[(B, Double)]) = OState(bins)
 }
 
+case class MState[B](bins: List[(B, Double)]) extends UState[MState[B], B, Double] {
+  val m = new Monoid[Double] {
+    override val empty: Double = 0.0
+    override val combine: (Double, Double) => Double = _ + _
+  }
+
+  override val updateStateRule: ((B, Double), B => List[(B, Double)]) => List[(B, Double)] = {
+    case ((b, v), f) => f(b).map { case (c, u) => (c, u * v) }
+  }
+
+  override def create(bins: List[(B, Double)]) = MState(bins)
+
+}
+
 case class PState[B](bins: List[(B, Double)]) extends UState[PState[B], B, Double] {
   val m = new Monoid[Double] {
     override val empty: Double = 1.0

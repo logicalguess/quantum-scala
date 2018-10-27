@@ -57,12 +57,19 @@ class ZeroSumSpec extends FlatSpec {
     val bins: List[(String, Double)] = List("a" -> 2, "b" -> 3, "c" -> 5, "d" -> -8, "e" -> -2)
 
     val z = ZState[String](bins)
-    val change = List("a" -> -1.0, "b" -> 1.0)
+    val changeA = List("a" -> -1.0, "b" -> 1.0)
+    val changeB = List("b" -> -2.0, "c" -> 1.0, "d" -> 1.0)
 
-    val step = z >>= Map("a" -> change, "b" -> Nil, "c" -> Nil, "d" -> Nil, "e" -> Nil)
+    val step = z >>= Map("a" -> changeA, "b" -> changeB, "c" -> Nil, "d" -> Nil, "e" -> Nil)
+
+    println(step.bins)
 
     assert(step.bins.contains("a" -> 1.0))
-    assert(step.bins.contains("b" -> 4.0))
+    assert(step.bins.contains("b" -> 2.0))
+    assert(step.bins.contains("c" -> 6.0))
+    assert(step.bins.contains("d" -> -7.0))
+    assert(step.bins.contains("e" -> -2.0))
+
   }
 
   "3" should "" in {
