@@ -16,9 +16,9 @@ class QSpec extends FlatSpec {
 
   def total(bins: List[(String, Complex)]): Double = math.sqrt(bins.map(_._2.norm2).foldLeft(0.0)(_ + _))
 
-  def ><(bin1: List[(String, Complex)], bin2: List[(String, Complex)]): String => List[(String, Complex)] = {
-    val m = collect(bin2).toMap
-    b => bin1.map { case (b1, v1) => (b1, v1 * m.getOrElse(b, Complex.zero).conj) }
+  def ><(bins1: List[(String, Complex)], bins2: List[(String, Complex)]): String => List[(String, Complex)] = {
+    val m = collect(bins2).toMap
+    b => bins1.map { case (b1, v1) => (b1, v1 * m.getOrElse(b, Complex.zero).conj) }
   }
 
   def pure(b: String): List[(String, Complex)] = List(b -> Complex.one)
