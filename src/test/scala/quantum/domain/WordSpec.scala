@@ -95,8 +95,8 @@ class WordSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
     var state = pure(Word.fromInt(0, n))
     for (i <- 0 until n) state = state >>= wire(i, H)
     for (i <- 0 until n - 1)  state = state >>= controlledL(Set(i), i + 1, ZERO)
-    //for (i <- 0 until n - 1)  state = state >>= wire(i + 1, Ry(-math.Pi/4)) >>= controlledL(Set(i), i + 1, X) >>=
-    //  wire(i + 1, Ry(math.Pi/4)) >>= controlledL(Set(i), i + 1, X)
+//    for (i <- 0 until n - 1)  state = state >>= wire(i + 1, Ry(-math.Pi/4)) >>= controlledL(Set(i), i + 1, X) >>=
+//      wire(i + 1, Ry(math.Pi/4)) >>= controlledL(Set(i), i + 1, X) >>= wire(i + 1, Z)
 
     state
   }
