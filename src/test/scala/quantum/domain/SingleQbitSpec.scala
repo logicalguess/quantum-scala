@@ -227,6 +227,15 @@ class SingleQbitSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
     assert(y(S1).toString == h(S1).toString)
   }
 
+  "XRy(pi/2)" should "equal H" in forAll { state:  QState[Std] =>
+
+    val y: QState[Std] = state >>= Ry(math.Pi/2) >>= X
+    val h: QState[Std] = state >>= H
+
+    assert(y(S0).toString == h(S0).toString)
+    assert(y(S1).toString == h(S1).toString)
+  }
+
   "Rz(pi)" should "equal -i*Z" in forAll { s: QState[Std] =>
 
     val t: QState[Std] = (Z * -Complex.i) (s)
