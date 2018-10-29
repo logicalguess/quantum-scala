@@ -52,7 +52,11 @@ class BayesSpec extends FlatSpec {
     val bins: List[(String, Double)] = List("a" -> 0.1, "b" -> 0.3, "c" -> 0.6)
     val p = PState(bins)
 
-    val change = Map("a" -> List("a" -> 0.2), "b" -> List("b" -> 0.7), "c" -> List("c" -> 0.0))
+    val change = Map(
+      "a" -> List("a" -> 0.2),
+      "b" -> List("b" -> 0.7),
+      "c" -> List("c" -> 0.0))
+
     println(p >>= change)
 
     val likelihoods = List("a" -> 0.2, "b" -> 0.7, "c" -> 0.0) // likelihoods of certain data point

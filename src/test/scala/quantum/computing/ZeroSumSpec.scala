@@ -60,15 +60,9 @@ class ZeroSumSpec extends FlatSpec {
     val changeA = List("a" -> -1.0, "b" -> 1.0)
     val changeB = List("b" -> -2.0, "c" -> 1.0, "d" -> 1.0)
 
-    val step = z >>= Map("a" -> changeA, "b" -> changeB, "c" -> Nil, "d" -> Nil, "e" -> Nil)
+    val state = z >>= Map("a" -> changeA, "b" -> changeB, "c" -> Nil, "d" -> Nil, "e" -> Nil)
 
-    println(step.bins)
-
-    assert(step.bins.contains("a" -> 1.0))
-    assert(step.bins.contains("b" -> 2.0))
-    assert(step.bins.contains("c" -> 6.0))
-    assert(step.bins.contains("d" -> -7.0))
-    assert(step.bins.contains("e" -> -2.0))
+    assert(state.bins.toSet == Set("a" -> 1.0, "b" -> 2.0, "c" -> 6.0, "d" -> -7.0, "e" -> -2.0))
 
   }
 

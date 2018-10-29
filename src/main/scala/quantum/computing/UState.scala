@@ -23,7 +23,8 @@ trait UState[+This <: UState[This, B, V], B, V] {
   def normalize(): This = create(normalizeStateRule(bins))
 
   def flatMap(f: B => List[(B, V)]): This = {
-    create(normalizeStateRule(combineBinsRule(bins.flatMap({ case bv => updateStateRule(bv, f) }))))
+    val updates: List[(B, V)] = bins.flatMap({ case bv => updateStateRule(bv, f) })
+    create(normalizeStateRule(combineBinsRule(updates)))
   }
 
   def >>=(f: B => List[(B, V)]): This = flatMap(f)
@@ -65,7 +66,6 @@ case class MState[B](bins: List[(B, Double)]) extends UState[MState[B], B, Doubl
   }
 
   override def create(bins: List[(B, Double)]) = MState(bins)
-
 }
 
 case class PState[B](bins: List[(B, Double)]) extends UState[PState[B], B, Double] {
