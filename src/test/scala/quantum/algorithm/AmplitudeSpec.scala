@@ -2,7 +2,7 @@ package quantum.algorithm
 
 import org.scalatest.FlatSpec
 import quantum.algorithm.Grover._
-import quantum.domain.Gate
+import quantum.domain.{Gate, QState}
 import quantum.domain.Gate.{H, I, Z, controlledL, rot, wire, _}
 import quantum.domain.QState.pure
 import quantum.domain.Symbol.{Std, Word}
@@ -165,18 +165,9 @@ class AmplitudeSpec extends FlatSpec {
   import scala.collection.immutable.ListMap
   def highToLow(m: Map[_, Double]) = ListMap(m.mapValues(v => trunc(v)).toSeq.sortWith(_._2 > _._2):_*)
 
-  "bias" should "be approximated" in {
+  def amplitude(n_controls: Int, n_targets: Int, A: Gate[Std, Std], Q: Word[Std] => QState[Word[Std]]) = {
 
-    val n_controls = 7
     val controls = (0 until n_controls).toList
-
-    val n_targets = 0
-    val targets = (0 until n_targets).toList
-
-    val bias = 0.62
-    val theta = 2 * math.asin(math.sqrt(bias))
-    val A: Gate[Std, Std] = Ry(theta)
-    val Q = Ry(2 * theta)
 
     var state = pure(Word.fromInt(0, n_controls + n_targets + 1))
 
@@ -188,11 +179,14 @@ class AmplitudeSpec extends FlatSpec {
 
     for (i <- 0 until n_controls) {
       for (j <- 1 to math.pow(2, i).toInt)
-        state = state >>= controlledI(i, wire(n_targets + n_controls, Q))
+        state = state >>= controlledI(i, Q)
     }
     //state.hist
 
-    state = state >>= QFT.iqftL(controls)
+    state >>= QFT.iqftL(controls)
+  }
+
+  def stats(state: QState[Word[Std]], n_controls: Int) = {
     state.hist
 
     val frequencies = for {
@@ -217,7 +211,44 @@ class AmplitudeSpec extends FlatSpec {
     val s = top2.head._1
     val e = top2.tail.head._1
 
-    println(s"guess: ${s + (e - s) * p2/(p1+p2)}")
+    println(s"guess: ${s + (e - s) * p2 / (p1 + p2)}")
+  }
+
+  "bias" should "be approximated" in {
+
+    val n_controls = 7
+    val n_targets = 0
+
+    val bias = 0.62
+    val theta = 2 * math.asin(math.sqrt(bias))
+    val A: Gate[Std, Std] = Ry(theta)
+    val Q = wire(n_targets + n_controls, Ry(2 * theta)) _
+
+    val state = amplitude(n_controls, n_targets, A, Q)
+
+    stats(state, n_controls)
+  }
+
+  "count" should "be approximated" in {
+
+    //def f(x: Int) = true
+    //def f(x: Int) = x == 3
+    def f(x: Int) = x < 3
+    //def f(n: Int): Boolean = (n & (n >>> 1)) != 0
+
+    val n_controls = 3
+    val n_targets = 2
+
+    val targets = (0 until n_targets).toList
+    def gf(shift: Int): Word[Std] => QState[Word[Std]] =
+      wire(n_targets + shift, Z) _ >=> oracleL(f)(targets.map { i => i + shift }, n_targets + shift) >=> wire(n_targets + shift, Z) >=> invL(targets.map { i => i + shift })
+
+    val A: Gate[Std, Std] = I
+    val Q = gf(n_controls)
+
+    val state = amplitude(n_controls, n_targets, A, Q)
+
+    stats(state, n_controls)
   }
 
 }
