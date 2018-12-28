@@ -11,7 +11,10 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import util
 
 
-# {'00': 1/srt(2)*cos(phi), '01': 1/srt(2)*sin(phi), '10': 1/sqrt(2)*cos(phi + theta), '11': 1/sqrt(2)*sin(phi + theta)}
+# '00': 1/srt(2)*cos(phi),
+# '01': 1/sqrt(2)*sin(phi)
+# '10': 1/sqrt(2)*cos(phi + theta)
+# '11': 1/sqrt(2)*sin(phi + theta)
 
 def cry(theta, qc, q_control, q_target):
     qc.ry(theta/2, q_target)

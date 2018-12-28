@@ -78,6 +78,9 @@ if __name__ == "__main__":
 
     visualization.plot_histogram(hist)
 
+    print("sqrt(1/8)*cos(phi) = ", np.round(math.sqrt(1/8)*np.cos(phi), 5))
+    print("sqrt(1/8)*sin(phi) = ", np.round(math.sqrt(1/8)*np.sin(phi), 5))
+
     print("sqrt(1/8)*cos(phi + theta) = ", np.round(math.sqrt(1/8)*np.cos(phi + theta), 5))
     print("sqrt(1/8)*sin(phi + theta) = ", np.round(math.sqrt(1/8)*np.sin(phi + theta), 5))
 
