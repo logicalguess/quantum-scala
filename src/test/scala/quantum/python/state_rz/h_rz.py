@@ -38,6 +38,6 @@ if __name__ == "__main__":
     print("e^(i*theta)/sqrt(2) = ",
         math.sqrt(0.5)*complex(math.cos(theta), math.sin(theta)))
 
-    visualization.plot_histogram(hist)
+    #visualization.plot_histogram(hist)
 
 

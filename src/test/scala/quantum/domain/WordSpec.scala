@@ -190,7 +190,7 @@ class WordSpec extends FlatSpec with GeneratorDrivenPropertyChecks {
 
     def ones(i: Int, width: Int): Double = {
       var state = pure(Word.fromInt(2 * i, width))
-      for (i <- 0 until width - 1) state = state >>= controlledL(Set(i), width - 1, rot(anglef(width)))
+      for (i <- 0 until width - 1) state = state >>= controlledL(Set(i), width - 1, Ry(2*anglef(width)))
 
       // probability last bit is 1
       state(Word.fromInt(2 * i + 1, width)).norm2
